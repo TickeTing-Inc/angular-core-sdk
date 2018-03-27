@@ -1,0 +1,28 @@
+{
+  "name": "@ticketing/angular-core-sdk",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TickeTing-Inc/angular-core-sdk"
+  },
+  "author": {
+    "name": "Sven James",
+    "email": "sven@ticketingevents.co"
+  },
+  "keywords": [
+    "angular"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TickeTing-Inc/angular-core-sdk/issues"
+  },
+  "main": "angular-core-sdk.umd.js",
+  "module": "angular-core-sdk.js",
+  "jsnext:main": "angular-core-sdk.js",
+  "typings": "angular-core-sdk.d.ts",
+  "peerDependencies": {
+    "@angular/core": "^4.0.0",
+    "rxjs": "^5.1.0",
+    "zone.js": "^0.8.4"
+  }
+}

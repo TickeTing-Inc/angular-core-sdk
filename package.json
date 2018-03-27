@@ -1,0 +1,82 @@
+{
+  "name": "@ticketing/angular-core-sdk",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "gulp build",
+    "build:watch": "gulp",
+    "docs": "npm run docs:build",
+    "docs:build": "compodoc -p tsconfig.json -n @ticketing/angular-core-sdk -d docs --hideGenerator",
+    "docs:serve": "npm run docs:build -- -s",
+    "docs:watch": "npm run docs:build -- -s -w",
+    "lint": "tslint --type-check --project tsconfig.json src/**/*.ts",
+    "lite": "lite-server",
+    "pack": "gulp build && npm pack dist",
+    "publish": "gulp build && npm publish dist",
+    "playground:build": "tsc -p playground -w",
+    "playground": "concurrently \"npm run build:watch\" \"npm run playground:build\" \"npm run lite\"",
+    "test": "tsc && karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TickeTing-Inc/angular-core-sdk"
+  },
+  "author": {
+    "name": "Sven James",
+    "email": "sven@ticketingevents.co"
+  },
+  "keywords": [
+    "angular",
+    "ticketing",
+    "event management",
+    "sdk",
+    "antigua",
+    "caribbean"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TickeTing-Inc/angular-core-sdk/issues"
+  },
+  "devDependencies": {
+    "@angular/common": "^5.0.0",
+    "@angular/compiler": "^5.0.0",
+    "@angular/compiler-cli": "^5.0.0",
+    "@angular/core": "^5.0.0",
+    "@angular/platform-browser": "^5.0.0",
+    "@angular/platform-browser-dynamic": "^5.0.0",
+    "@compodoc/compodoc": "^1.0.0-beta.10",
+    "@types/jasmine": "2.8.6",
+    "@types/node": "~9.6.0",
+    "angular-in-memory-web-api": "^0.6.0",
+    "codelyzer": "~4.2.1",
+    "concurrently": "^3.4.0",
+    "core-js": "^2.4.1",
+    "fs-extra": "^5.0.0",
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-rollup": "^2.15.0",
+    "jasmine-core": "~3.1.0",
+    "jasmine-spec-reporter": "~4.2.1",
+    "karma": "~2.0.0",
+    "karma-chrome-launcher": "~2.2.0",
+    "karma-cli": "~1.0.1",
+    "karma-coverage-istanbul-reporter": "^1.2.1",
+    "karma-jasmine": "~1.1.0",
+    "karma-jasmine-html-reporter": "^1.0.0",
+    "lite-server": "^2.3.0",
+    "node-sass": "^4.5.2",
+    "node-sass-tilde-importer": "^1.0.0",
+    "node-watch": "^0.5.2",
+    "protractor": "~5.3.0",
+    "rollup": "^0.57.1",
+    "run-sequence": "^2.2.1",
+    "rxjs": "^5.5.2",
+    "systemjs": "^0.21.0",
+    "ts-node": "~5.0.1",
+    "tslint": "~5.9.1",
+    "typescript": "~2.8.1",
+    "zone.js": "^0.8.14"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  }
+}
