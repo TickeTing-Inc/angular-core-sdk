@@ -7,13 +7,15 @@ import { ConfigService } from './service/config.service';
 import { CacheService } from './service/cache.service';
 import { ConnectionService } from './service/connection.service';
 import { EventService } from './service/event.service';
+import { TierService } from './service/tier.service';
 
 //Export Library Services
 export { ConfigService } from './service/config.service';
 export { EventService } from './service/event.service';
 
 //Export Library Models
-import { Event } from './model/event.model';
+export { Event } from './model/event.model';
+export { Tier } from './model/tier.model';
 
 @NgModule({
   imports:[
@@ -21,7 +23,8 @@ import { Event } from './model/event.model';
   ],
   providers:[
     CacheService,
-    ConnectionService
+    ConnectionService,
+    TierService
   ]
 })
 export class TicketingModule {

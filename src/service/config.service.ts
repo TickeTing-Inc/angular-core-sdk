@@ -1,10 +1,9 @@
 import { Inject, Injectable } from '@angular/core';
+import { config } from '../config';
+import { Service } from './service';
 
 @Injectable()
-export class ConfigService{
-  readonly PRODUCTION_BASE = "https://ticketing.mywadapi.com";
-  readonly SANDBOX_BASE = "https://ticketing.sandbox.mywadapi.com";
-
+export class ConfigService extends Service{
   private _baseUrl: string;
   private _key: string;
   private _secret: string;
@@ -12,11 +11,12 @@ export class ConfigService{
   private _isCacheEnabled: boolean;
 
   constructor(@Inject('APP_CONFIG') _appConfig: any){
+    super();
     this._key = ("key" in _appConfig)?_appConfig.key:"";
     this._secret = ("secret" in _appConfig)?_appConfig.secret:"";
     this._isProduction = ("production" in _appConfig)?_appConfig.production:false;
     this._isCacheEnabled = ("caching" in _appConfig)?_appConfig.caching:true;
-    this._baseUrl = this._isProduction?this.PRODUCTION_BASE:this.SANDBOX_BASE;
+    this._baseUrl = this._isProduction?config.PRODUCTION_BASE:config.SANDBOX_BASE;
   }
 
   get baseUrl():string{

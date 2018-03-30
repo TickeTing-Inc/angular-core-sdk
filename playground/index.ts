@@ -13,12 +13,23 @@ import { TicketingModule, EventService } from '@ticketing/angular-core-sdk';
   templateUrl: "demo.html"
 })
 class AppComponent {
-  public events: any;
+  public event: any;
+  public tiers: any;
+  public tierVisible: any;
+
   constructor(_eventService: EventService){
-    this.events = [];
-    _eventService.listForTitle("Rose",1,5).subscribe(events => {
-      for(let i=0; i < events.length; i++){
-        this.events.push(events[i]);
+    _eventService.listUpcoming(1,1).subscribe(events => {
+      this.tierVisible = {};
+      this.event = events[0];
+      this.tiers = [];
+      if(this.event){
+        this.event.getTiers().subscribe(tiers => {
+          this.tiers = [];
+          for(let i=0; i < tiers.length; i++){
+            this.tiers.push(tiers[i]);
+            this.tierVisible[tiers[i].endpoint] = this.tiers[i].hasOptions();
+          }
+        })
       }
     });
   }

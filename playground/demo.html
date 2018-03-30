@@ -1,5 +1,12 @@
-<div *ngFor="let event of events">
-  <img src='{{event.flyer}}' />
-  <div>{{event.title}}</div>
-  <div>{{event.category}}</div>
+<div style='float:left'>
+  <img src='{{event?.flyer}}' />
+  <div>{{event?.title}}</div>
+  <div>{{event?.category}}</div>
+</div>
+<h1>Tiers</h1>
+<div *ngFor="let tier of tiers">
+  <div *ngIf="!(tierVisible[tier.endpoint] | async)">
+    <div>{{tier.title}} - {{tier.price + tier.convenienceFee}}</div>
+    <div>{{tier.remaining}} Remaining</div>
+  </div>
 </div>
