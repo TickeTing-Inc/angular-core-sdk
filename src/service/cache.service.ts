@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { Service } from './service';
+import { ModelService } from './model.service';
 
 @Injectable()
-export class CacheService extends Service{
+export class CacheService{
   private _cache: Map<string, {value: any, expiry: number}>;
   constructor(){
-    super();
     this._cache = new Map<string, {value: any, expiry: number}>();
     let storedKeys = Object.keys(localStorage);
     for(let i=0; i < storedKeys.length; i++){
@@ -76,15 +75,16 @@ export class CacheService extends Service{
       for(let i=0; i < value.length; i++){
         let nextValue = {};
         for(let field in value[i]){
-          if(typeof(value[i][field]) !== "function" && !(value[i][field] instanceof Service)){
+          if(typeof(value[i][field]) !== "function" && !(value[i][field] instanceof ModelService)){
             nextValue[field] = value[i][field];
           }
         }
         persistantValue.push(nextValue);
       }
     }else{
+      persistantValue = {};
       for(let field in value){
-        if(typeof(value[field]) !== "function" && !(value[field] instanceof Service)){
+        if(typeof(value[field]) !== "function" && !(value[field] instanceof ModelService)){
           persistantValue[field] = value[field];
         }
       }

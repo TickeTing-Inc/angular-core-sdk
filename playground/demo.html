@@ -1,12 +1,6 @@
-<div style='float:left'>
-  <img src='{{event?.flyer}}' />
-  <div>{{event?.title}}</div>
-  <div>{{event?.category}}</div>
-</div>
-<h1>Tiers</h1>
-<div *ngFor="let tier of tiers">
-  <div *ngIf="!(tierVisible[tier.endpoint] | async)">
-    <div>{{tier.title}} - {{tier.price + tier.convenienceFee}}</div>
-    <div>{{tier.remaining}} Remaining</div>
-  </div>
+<div *ngIf="merchant">
+  <div>{{merchant?.name}}</div>
+  <h4>Tokens</h4>
+  <div>{{merchant.getTokens().code | async}}</div>
+  <div>{{merchant.getTokens().tokens | async}}</div>
 </div>

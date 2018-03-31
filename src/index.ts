@@ -8,14 +8,22 @@ import { CacheService } from './service/cache.service';
 import { ConnectionService } from './service/connection.service';
 import { EventService } from './service/event.service';
 import { TierService } from './service/tier.service';
+import { ProfileService } from './service/profile.service';
+import { XpressCardService } from './service/xpress-card.service';
+import { MerchantService } from './service/merchant.service';
 
 //Export Library Services
 export { ConfigService } from './service/config.service';
 export { EventService } from './service/event.service';
+export { ProfileService } from './service/profile.service';
+export { MerchantService } from './service/merchant.service';
 
 //Export Library Models
 export { Event } from './model/event.model';
 export { Tier } from './model/tier.model';
+export { Profile } from './model/profile.model';
+export { XpressCard } from './model/xpress-card.model';
+export { Merchant } from './model/merchant.model';
 
 @NgModule({
   imports:[
@@ -24,7 +32,8 @@ export { Tier } from './model/tier.model';
   providers:[
     CacheService,
     ConnectionService,
-    TierService
+    TierService,
+    XpressCardService
   ]
 })
 export class TicketingModule {
@@ -34,7 +43,9 @@ export class TicketingModule {
       providers: [
         {provide: 'APP_CONFIG', useValue: appConfig},
         ConfigService,
-        EventService
+        EventService,
+        ProfileService,
+        MerchantService
       ]
     };
   }

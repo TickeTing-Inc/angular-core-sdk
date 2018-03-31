@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { config } from '../config';
-import { Service } from './service';
 
 @Injectable()
-export class ConfigService extends Service{
+export class ConfigService{
   private _baseUrl: string;
   private _key: string;
   private _secret: string;
@@ -11,7 +10,6 @@ export class ConfigService extends Service{
   private _isCacheEnabled: boolean;
 
   constructor(@Inject('APP_CONFIG') _appConfig: any){
-    super();
     this._key = ("key" in _appConfig)?_appConfig.key:"";
     this._secret = ("secret" in _appConfig)?_appConfig.secret:"";
     this._isProduction = ("production" in _appConfig)?_appConfig.production:false;
