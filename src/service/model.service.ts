@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from './config.service';
 import { ConnectionService } from './connection.service';
 import { Connection } from '../model/connection.model';
+import { Service } from './service';
 
 @Injectable()
-export class ModelService{
+export class ModelService extends Service{
   private _baseUrl: string;
   protected _connection: Connection;
 
   constructor(protected _configService: ConfigService, _connectionService: ConnectionService){
+    super();
     this._baseUrl = _configService.baseUrl;
     this._connection = _connectionService.openConnection();
   }

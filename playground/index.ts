@@ -6,19 +6,14 @@ import { NgModule } from '@angular/core';
 import { Component } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import { TicketingModule, MerchantService, Merchant } from '@ticketing/angular-core-sdk';
+import { TicketingModule } from '@ticketing/angular-core-sdk';
 
 @Component({
   selector: 'app',
   templateUrl: "demo.html"
 })
 class AppComponent {
-  public merchant: Merchant;
-
-  constructor(_merchantService: MerchantService){
-    _merchantService.getByCode("SENG8919").subscribe(merchant => {
-        this.merchant = merchant;
-    })
+  constructor(){
   }
 }
 

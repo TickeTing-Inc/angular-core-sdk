@@ -17,6 +17,7 @@ export { ConfigService } from './service/config.service';
 export { EventService } from './service/event.service';
 export { ProfileService } from './service/profile.service';
 export { MerchantService } from './service/merchant.service';
+export { TierService} from './service/tier.service';
 
 //Export Library Models
 export { Event } from './model/event.model';
@@ -45,7 +46,8 @@ export class TicketingModule {
         ConfigService,
         EventService,
         ProfileService,
-        MerchantService
+        MerchantService,
+        TierService
       ]
     };
   }
