@@ -19,7 +19,7 @@ export class CacheService extends Service{
 
   retrieve(key:string, replacement: Function, builder: Function, ttl: number): Observable<any>{
     let self = this;
-    return Observable.create(function(observer){
+    return Observable.create(observer => {
       if(self.has(key)){
         let storedValue = self._retrieve(key);
         if(storedValue instanceof Array){

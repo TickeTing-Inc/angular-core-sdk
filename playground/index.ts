@@ -6,14 +6,23 @@ import { NgModule } from '@angular/core';
 import { Component } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import { TicketingModule } from '@ticketing/angular-core-sdk';
+import { TicketingModule, Profile, ProfileService, Order, OrderService, MerchantService } from '@ticketing/angular-core-sdk';
 
 @Component({
   selector: 'app',
   templateUrl: "demo.html"
 })
 class AppComponent {
-  constructor(){
+  public orders;
+
+  constructor(_profileService: ProfileService, _orderService: OrderService, _merchantService: MerchantService){
+    _merchantService.getByCode('TING0000').subscribe(merchant => {
+      merchant.listSales(1,25).subscribe(orders => {
+        this.orders = orders
+        orders[0].listItems().subscribe(order => {
+        })
+      })
+    })
   }
 }
 

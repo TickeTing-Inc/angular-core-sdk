@@ -9,14 +9,29 @@ import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { ConnectionService } from './connection.service';
 import { CacheService } from './cache.service';
+import { OrderService } from './order.service';
+import { ProfileService } from './profile.service';
 
 import { Merchant } from '../model/merchant.model';
 
 @Injectable()
 export class MerchantService extends ModelService{
   constructor(_configService: ConfigService, private _connectionService: ConnectionService,
-              private _cacheService: CacheService){
+              private _cacheService: CacheService, private _orderService: OrderService,
+              private _profileService: ProfileService){
     super(_configService,_connectionService);
+  }
+
+  public getByUri(uri: string): Observable<Merchant>{
+    let cacheKey = this.getEndpoint(uri);
+    let self = this;
+    return this._cacheService.retrieve(cacheKey,
+      () => {
+        return self._connection.get(cacheKey)
+      },
+      merchantData => {
+        return this._buildMerchant(merchantData,self);
+      },60);
   }
 
   getByCode(code: string): Observable<Merchant>{
@@ -48,14 +63,20 @@ export class MerchantService extends ModelService{
           .map(response => response.entries)
       },
       merchantData => {
-        return new Merchant(
-          ("self" in merchantData)?self.getEndpoint(merchantData["self"]):merchantData["endpoint"],
-          merchantData["name"],
-          merchantData["registered"],
-          merchantData["active"],
-          self._cacheService,
-          self._connectionService
-        );
+        return this._buildMerchant(merchantData,self);
       },604800);
+  }
+
+  private _buildMerchant(merchantData: any, self: any){
+    return new Merchant(
+      ("self" in merchantData)?self.getEndpoint(merchantData["self"]):merchantData["endpoint"],
+      merchantData["name"],
+      merchantData["registered"],
+      merchantData["active"],
+      self._cacheService,
+      self._connectionService,
+      self._orderService,
+      self._profileService
+    );
   }
 }

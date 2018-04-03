@@ -12,6 +12,7 @@ import { CacheService } from './cache.service';
 import { TierService } from './tier.service';
 
 import { Event } from '../model/event.model';
+import { Tier } from '../model/tier.model';
 import { Profile } from '../model/profile.model';
 
 @Injectable()
@@ -41,7 +42,11 @@ export class EventService extends ModelService{
     return this._listForProfile(profile,"attended",86400);
   }
 
-  private _list(page: number, records: number, parameters: any = {}): Observable<Array<Event>>{
+  listForTier(tier: Tier){
+    return this._list(1,1,{},tier.endpoint);
+  }
+
+  private _list(page: number, records: number, parameters: any = {}, prefix: string = ""): Observable<Array<Event>>{
     let queryParameters = {
       page: page,
       records: records
@@ -51,12 +56,12 @@ export class EventService extends ModelService{
       queryParameters[parameter] = parameters[parameter];
     }
 
-    let cacheKey = "/events?"+JSON.stringify(queryParameters);
+    let cacheKey = prefix+"/events?"+JSON.stringify(queryParameters);
     let self = this;
     return this._cacheService.retrieve(cacheKey,
       () => {
-        return self._connection.get("/events",queryParameters)
-          .map(response => response.entries)
+        return self._connection.get(prefix+"/events",queryParameters)
+          .map(response => prefix?response.events:response.entries);
       },
       eventData => {
         return self._buildEvent(eventData,self);

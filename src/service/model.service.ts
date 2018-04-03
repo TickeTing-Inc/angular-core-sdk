@@ -6,7 +6,7 @@ import { Service } from './service';
 
 @Injectable()
 export class ModelService extends Service{
-  private _baseUrl: string;
+  protected _baseUrl: string;
   protected _connection: Connection;
 
   constructor(protected _configService: ConfigService, _connectionService: ConnectionService){

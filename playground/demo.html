@@ -1,0 +1,7 @@
+<div *ngFor="let order of orders">
+<h3>Order Details</h3>
+  <div>{{order.number}}</div>
+  <div *ngFor="let item of (order.listItems() | async)">
+    {{item.amount}}x {{item.tier.title}}
+  </div>
+</div>
