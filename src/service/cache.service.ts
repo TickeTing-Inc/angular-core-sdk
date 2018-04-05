@@ -68,6 +68,10 @@ export class CacheService extends Service{
     return this.has(key)?this._now() > this._cache.get(key).expiry:false;
   }
 
+  isValid(key: string): boolean{
+    return this.has(key) && !this.isExpired(key);
+  }
+
   private _store(key: string,value: any,ttl: number){
     //Remove functions from being persisted
     let persistantValue;

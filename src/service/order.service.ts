@@ -119,11 +119,13 @@ export class OrderService extends ModelService{
       orderData.created,
       orderData.expires,
       orderData.closed,
-      orderData.merchant,
+      ("_merchant" in orderData)?orderData["_merchant"]:orderData["merchant"],
+      ("_agent" in orderData)?orderData["_agent"]:orderData["agent"],
       self._ticketService,
       self._tierService,
       self._connectionService,
-      self._cacheService
+      self._cacheService,
+      self._baseUrl
     );
   }
 }

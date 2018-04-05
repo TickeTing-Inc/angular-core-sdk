@@ -5,6 +5,8 @@ import { Tier } from './tier.model';
 
 export class Event{
   public public: boolean;
+  public tiers: Observable<Array<Tier>>;
+
   private 'start-time': Date;
   private 'end-time': Date;
   private 'gates-open': Date;
@@ -19,6 +21,7 @@ export class Event{
     this['gates-open'] = new Date(gatesOpen);
     this.public = isPublic;
     this['local-tickets-from'] = startPrice;
+    this.tiers = this._getTiers();
   }
 
   get startTime(): Date{
@@ -41,7 +44,7 @@ export class Event{
     return this['local-tickets-from'];
   }
 
-  getTiers(): Observable<Array<Tier>>{
+  private _getTiers(): Observable<Array<Tier>>{
     return this._tierService.listForEvent(this);
   }
 }

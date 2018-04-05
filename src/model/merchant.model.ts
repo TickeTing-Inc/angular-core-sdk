@@ -10,27 +10,14 @@ import { Order } from './order.model';
 
 export class Merchant{
   private _connection: Connection;
+  public tokens: Observable<{code:string,token:string}>;
 
   constructor(public endpoint: string, public name: string, public registered: Date,
                 public active: boolean, private _cacheService: CacheService,
                 _connectionService: ConnectionService, private _orderService: OrderService,
                 private _profileService: ProfileService){
     this._connection = _connectionService.openConnection();
-  }
-
-  getTokens(){
-    let cacheKey = this.endpoint+"/token";
-    let self = this;
-    return this._cacheService.retrieve(cacheKey,
-      () => {
-        return self._connection.get(cacheKey);
-      },
-      tokenData => {
-        return {
-          code: tokenData.code,
-          token: tokenData.token
-        };
-      },604800);
+    this.tokens = this._getTokens();
   }
 
   listSales(page: number, records: number, startDate: string = "", endDate: string = "",
@@ -51,5 +38,20 @@ export class Merchant{
         })
       })
     });
+  }
+
+  private _getTokens(): Observable<{code:string,token:string}>{
+    let cacheKey = this.endpoint+"/token";
+    let self = this;
+    return this._cacheService.retrieve(cacheKey,
+      () => {
+        return self._connection.get(cacheKey);
+      },
+      tokenData => {
+        return {
+          code: tokenData.code,
+          token: tokenData.token
+        };
+      },604800);
   }
 }

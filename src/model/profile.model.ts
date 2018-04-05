@@ -10,6 +10,11 @@ import { Order } from './order.model';
 import { Observable } from 'rxjs/Observable';
 
 export class Profile{
+  public xpressCard: Observable<XpressCard>;
+  public favourites: Observable<Array<Event>>;
+  public attending: Observable<Array<Event>>;
+  public attended: Observable<Array<Event>>;
+
   private 'first-name': string;
   private 'last-name': string;
 
@@ -20,6 +25,11 @@ export class Profile{
                 private _ticketService: TicketService, private _orderService: OrderService){
       this['first-name'] = firstName;
       this['last-name'] = lastName;
+
+      this.xpressCard = this._getXpressCard();
+      this.favourites = this._listFavourites();
+      this.attending = this._listAttending();
+      this.attended = this._listAttended();
   }
 
   get signupDate(): Date{
@@ -42,23 +52,8 @@ export class Profile{
     return `${this.title} ${this.firstName} ${this.lastName}`;
   }
 
-  getXpressCard(): Observable<XpressCard>{
-    return this._xpressCardService.getByProfile(this);
-  }
-
-  listFavourites(): Observable<Array<Event>>{
-    return this._eventService.listForProfileWishlist(this);
-  }
-
-  listAttending(): Observable<Array<Event>>{
-    return this._eventService.listForProfileAttending(this);
-  }
-
-  listAttended(): Observable<Array<Event>>{
-    return this._eventService.listForProfileAttended(this);
-  }
-
-  listWallet(groupBy: string = "", status: string = "", event: Event = null): Observable<Array<any>>{
+  listWallet(groupBy: string = "", status: string = "",
+              event: Event = null): Observable<Array<any>>{
     let self = this;
     return Observable.create(observer => {
       this._ticketService.listForProfile(self,status,event).subscribe(tickets => {
@@ -68,7 +63,7 @@ export class Profile{
 
         if(groupBy == "tier"){
           for(let i=0; i < tickets.length; i++){
-            tickets[i].getTier().subscribe(tier => {
+            tickets[i].tier.subscribe(tier => {
               if(!(tier.endpoint in entityMap)){
                 groupedTickets[tier.endpoint] = [];
                 entityMap[tier.endpoint] = tier;
@@ -92,7 +87,7 @@ export class Profile{
           }
         }else if(groupBy == "event"){
           for(let i=0; i < tickets.length; i++){
-            tickets[i].getTier().subscribe(tier => {
+            tickets[i].tier.subscribe(tier => {
               this._eventService.listForTier(tier).subscribe(events => {
                 for(let j=0; j < events.length; j++){
                   let event = events[j];
@@ -134,5 +129,21 @@ export class Profile{
 
   placeOrder(device: string = "", os: string = "", version: string = ""): Observable<Order>{
     return this._orderService.createForProfile(this,device,os,version);
+  }
+
+  private _getXpressCard(): Observable<XpressCard>{
+    return this._xpressCardService.getByProfile(this);
+  }
+
+  private _listFavourites(): Observable<Array<Event>>{
+    return this._eventService.listForProfileWishlist(this);
+  }
+
+  private _listAttending(): Observable<Array<Event>>{
+    return this._eventService.listForProfileAttending(this);
+  }
+
+  private _listAttended(): Observable<Array<Event>>{
+    return this._eventService.listForProfileAttended(this);
   }
 }

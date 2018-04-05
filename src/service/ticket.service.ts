@@ -49,7 +49,7 @@ export class TicketService extends ModelService{
       ticketData.purchased,
       ticketData.issued,
       ticketData.redeemed,
-      ticketData.tier,
+      ("tierUri" in ticketData)?ticketData.tierUri:ticketData.tier,
       this._tierService
     );
   }
