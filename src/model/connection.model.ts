@@ -11,10 +11,19 @@ export class Connection{
   private _secret: string;
   private _http: Http;
 
-  constructor(baseUrl: string, key: string, secret: string, httpClient: Http){
-    this._baseUrl = baseUrl;
-    this._key = key;
-    this._secret = secret;
+  constructor(baseUrl: Observable<string>, key: Observable<string>, secret: Observable<string>, httpClient: Http){
+    baseUrl.subscribe(baseUrl => {
+      this._baseUrl = baseUrl;
+    })
+
+    key.subscribe(key => {
+      this._key = key;
+    })
+
+    secret.subscribe(secret => {
+      this._secret = secret;
+    })
+    
     this._http = httpClient;
   }
 

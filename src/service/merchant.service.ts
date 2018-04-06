@@ -22,7 +22,7 @@ export class MerchantService extends ModelService{
     super(_configService,_connectionService);
   }
 
-  public getByUri(uri: string): Observable<Merchant>{
+  getByUri(uri: string): Observable<Merchant>{
     let cacheKey = this.getEndpoint(uri);
     let self = this;
     return this._cacheService.retrieve(cacheKey,

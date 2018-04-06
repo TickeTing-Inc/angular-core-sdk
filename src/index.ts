@@ -6,6 +6,7 @@ import { HttpModule } from '@angular/http';
 import { ConfigService } from './service/config.service';
 import { CacheService } from './service/cache.service';
 import { ConnectionService } from './service/connection.service';
+import { ModelService } from './service/model.service';
 import { EventService } from './service/event.service';
 import { TierService } from './service/tier.service';
 import { ProfileService } from './service/profile.service';
@@ -16,6 +17,8 @@ import { OrderService } from './service/order.service';
 
 //Export Library Services
 export { ConfigService } from './service/config.service';
+export { ConnectionService } from './service/connection.service';
+export { ModelService } from './service/model.service';
 export { EventService } from './service/event.service';
 export { ProfileService } from './service/profile.service';
 export { MerchantService } from './service/merchant.service';
@@ -23,6 +26,7 @@ export { TicketService } from './service/ticket.service';
 export { OrderService } from './service/order.service';
 
 //Export Library Models
+export { Connection } from './model/connection.model';
 export { Event } from './model/event.model';
 export { Tier } from './model/tier.model';
 export { Profile } from './model/profile.model';
@@ -50,6 +54,8 @@ export class TicketingModule {
       providers: [
         {provide: 'APP_CONFIG', useValue: appConfig},
         ConfigService,
+        ConnectionService,
+        ModelService,
         EventService,
         ProfileService,
         MerchantService,

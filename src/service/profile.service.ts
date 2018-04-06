@@ -26,6 +26,18 @@ export class ProfileService extends ModelService{
     super(_configService, _connectionService);
   }
 
+  getByUri(uri: string): Observable<Profile>{
+    let cacheKey = this.getEndpoint(uri);
+    let self = this;
+    return this._cacheService.retrieve(cacheKey,
+      () => {
+        return self._connection.get(cacheKey)
+      },
+      profileData => {
+        return this._buildProfile(profileData,self);
+      },60);
+  }
+
   getByUsername(username: string): Observable<Profile>{
     return this._get({username:username});
   }

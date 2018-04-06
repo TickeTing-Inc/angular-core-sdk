@@ -11,8 +11,11 @@ export class ModelService extends Service{
 
   constructor(protected _configService: ConfigService, _connectionService: ConnectionService){
     super();
-    this._baseUrl = _configService.baseUrl;
+
     this._connection = _connectionService.openConnection();
+    _configService.baseUrl.subscribe(baseUrl => {
+      this._baseUrl = baseUrl;
+    })
   }
 
   getEndpoint(uri: string){
