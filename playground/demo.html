@@ -1,12 +1,14 @@
-<h3>{{order?.number}}</h3>
-<div>{{order?.status}}</div>
-<div>{{order?.reason}}</div>
-<div>{{order?.merchant}}</div>
-<div>{{order?.agent}}</div>
+<h1>Demo Order Console</h1>
+<h3>Order #{{order?.number}}</h3>
+<div>Status: {{order?.status}}</div>
+<div>Reason: {{order?.reason}}</div>
+<div>Merchant: {{order?.merchant}}</div>
 <h4>Items</h4>
 <div *ngFor="let item of order?.items | async">
   <div>{{item?.amount}}x {{item?.tier?.title}}</div>
 </div>
+<br /><br />
+<div>
 <button (click)='addToOrder()'>Add To Order</button>
 <button (click)='removeFromOrder()'>Remove From Order</button>
 <button (click)='clearOrder()'>Clear Order</button>
@@ -15,3 +17,4 @@
 <button (click)='cashSettle()'>Cash Settle</button>
 <button (click)='cardSettle()'>Card Settle</button>
 <button (click)='sendReceipt()'>Send Receipt</button>
+</div>
