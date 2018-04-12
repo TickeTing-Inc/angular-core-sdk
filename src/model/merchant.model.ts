@@ -48,10 +48,12 @@ export class Merchant{
         return self._connection.get(cacheKey);
       },
       tokenData => {
-        return {
-          code: tokenData.code,
-          token: tokenData.token
-        };
+        return Observable.create(observer => {
+          observer.next({
+            code: tokenData.code,
+            token: tokenData.token
+          });
+        })
       },604800);
   }
 }
