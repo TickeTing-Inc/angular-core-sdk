@@ -81,7 +81,8 @@ export class EventService extends ModelService{
   }
 
   private _buildEvent(eventData: any, self: any){
-      return new Event(
+    return Observable.create(observer => {
+      observer.next(new Event(
         ("self" in eventData)?self.getEndpoint(eventData["self"]):eventData["endpoint"],
         eventData["title"],
         eventData["description"],
@@ -97,6 +98,7 @@ export class EventService extends ModelService{
         eventData["flyer"],
         eventData["banner"],
         self._tierService
-      );
+      ));
+    })
   }
 }

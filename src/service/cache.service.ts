@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { Subscriber } from 'rxjs/Subscriber';
 import { Service } from './service';
+import { Connection } from '../model/connection.model';
 
 @Injectable()
 export class CacheService extends Service{
@@ -25,33 +27,40 @@ export class CacheService extends Service{
         if(storedValue instanceof Array){
           let builtValues = [];
           for(let i=0; i < storedValue.length; i++){
-            builtValues.push(builder(storedValue[i]));
+            builder(storedValue[i]).subscribe(storedValue => {
+              builtValues[i] = storedValue;
+              self._store(key,builtValues,(self._cache.get(key).expiry - this._now())/1000);
+              observer.next(builtValues);
+            })
           }
-          observer.next(builtValues);
         }else{
-          observer.next(builder(storedValue))
+          builder(storedValue).subscribe(value => {
+            self._store(key,value,(self._cache.get(key).expiry - this._now())/1000);
+            observer.next(value);
+          })
         }
       }else{
         observer.next([]);
       }
 
       if(!self.has(key) || self.isExpired(key)){
-        replacement()
-          .subscribe(newValue => {
-            if(newValue instanceof Array){
-              let values = [];
-              for(let i=0; i < newValue.length; i++){
-                values.push(builder(newValue[i]));
-              }
-
-              newValue = values;
-            }else{
-              newValue = builder(newValue);
+        replacement().subscribe(newValue => {
+          if(newValue instanceof Array){
+            let values = [];
+            for(let i=0; i < newValue.length; i++){
+              builder(newValue[i]).subscribe(newValue => {
+                values[i] = newValue;
+                self._store(key,values,ttl);
+                observer.next(values);
+              });
             }
-
-            self._store(key,newValue,ttl);
-            observer.next(newValue);
-          })
+          }else{
+            builder(newValue).subscribe(newValue => {
+              self._store(key,newValue,ttl);
+              observer.next(newValue);
+            })
+          }
+        })
       }
     });
   }
@@ -80,7 +89,7 @@ export class CacheService extends Service{
       for(let i=0; i < value.length; i++){
         let nextValue = {};
         for(let field in value[i]){
-          if(typeof(value[i][field]) !== "function" && !(value[i][field] instanceof Service)){
+          if(this._isStorable(value[i][field])){
             nextValue[field] = value[i][field];
           }
         }
@@ -89,7 +98,7 @@ export class CacheService extends Service{
     }else{
       persistantValue = {};
       for(let field in value){
-        if(typeof(value[field]) !== "function" && !(value[field] instanceof Service)){
+        if(this._isStorable(value[field])){
           persistantValue[field] = value[field];
         }
       }
@@ -106,5 +115,24 @@ export class CacheService extends Service{
 
   private _now(){
     return Date.now();
+  }
+
+  private _isStorable(value){
+    let isStorable = true;
+    if(value instanceof Array){
+      for(let i=0; i<value.length; i++){
+        isStorable = isStorable && this._isStorable(value[i]);
+      }
+    }else{
+      isStorable = (
+        typeof(value) !== "function"
+          && !(value instanceof Service)
+          && !(value instanceof Subscriber)
+          && !(value instanceof Observable)
+          && !(value instanceof Connection)
+      );
+    }
+
+    return isStorable;
   }
 }

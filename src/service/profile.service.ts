@@ -93,22 +93,24 @@ export class ProfileService extends ModelService{
   }
 
   private _buildProfile(profileData,self){
-    return new Profile(
-      ("self" in profileData)?self.getEndpoint(profileData["self"]):profileData["endpoint"],
-      profileData["created"],
-      profileData["title"],
-      profileData["first-name"],
-      profileData["last-name"],
-      profileData["username"],
-      profileData["dob"],
-      profileData["country"],
-      profileData["email"],
-      profileData["phone"],
-      profileData["active"],
-      self._eventService,
-      self._xpressCardService,
-      self._ticketService,
-      self._orderService
-    );
+    return Observable.create(observer => {
+      observer.next(new Profile(
+        ("self" in profileData)?self.getEndpoint(profileData["self"]):profileData["endpoint"],
+        profileData["created"],
+        profileData["title"],
+        profileData["first-name"],
+        profileData["last-name"],
+        profileData["username"],
+        profileData["dob"],
+        profileData["country"],
+        profileData["email"],
+        profileData["phone"],
+        profileData["active"],
+        self._eventService,
+        self._xpressCardService,
+        self._ticketService,
+        self._orderService
+      ));
+    })
   }
 }

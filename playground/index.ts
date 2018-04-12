@@ -6,7 +6,7 @@ import { NgModule } from '@angular/core';
 import { Component } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import { TicketingModule, ProfileService, EventService, Order, Tier, Profile } from '@ticketing/angular-core-sdk';
+import { TicketingModule, OrderService, ProfileService, EventService, Order, Tier, Profile } from '@ticketing/angular-core-sdk';
 
 @Component({
   selector: 'app',
@@ -14,18 +14,27 @@ import { TicketingModule, ProfileService, EventService, Order, Tier, Profile } f
 })
 class AppComponent {
   public order: Order;
-  public tier: Tier;
+  private tier: Tier;
+  private profile: Profile;
 
-  constructor(_profileService: ProfileService, _eventService: EventService){
+  constructor(_profileService: ProfileService, _eventService: EventService, private _orderService: OrderService){
     _eventService.listUpcoming(1,1).subscribe(events => {
       events[0].tiers.subscribe(tiers => {
         this.tier = tiers[0];
       })
-    })
-    _profileService.getByUsername("svengineer").subscribe(profile => {
-      profile.placeOrder().subscribe(order => {
-        this.order = order;
+
+      _profileService.getByUsername("svengineer").subscribe(profile => {
+        this.profile = profile;
+        _orderService.getLastOrder().subscribe(order =>{
+          this.order = order;
+        })
       })
+    })
+  }
+
+  createOrder(){
+    this.profile.placeOrder().subscribe(order => {
+      this.order = order;
     })
   }
 

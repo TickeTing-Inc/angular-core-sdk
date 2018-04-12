@@ -42,15 +42,17 @@ export class TicketService extends ModelService{
   }
 
   private _buildTicket(ticketData, self): Ticket{
-    return new Ticket(
-      ("self" in ticketData)?self.getEndpoint(ticketData["self"]):ticketData["endpoint"],
-      ticketData.serial,
-      ticketData.status,
-      ticketData.purchased,
-      ticketData.issued,
-      ticketData.redeemed,
-      ("tierUri" in ticketData)?ticketData.tierUri:ticketData.tier,
-      this._tierService
-    );
+    return Observable.create(observer => {
+      observer.next(new Ticket(
+        ("self" in ticketData)?self.getEndpoint(ticketData["self"]):ticketData["endpoint"],
+        ticketData.serial,
+        ticketData.status,
+        ticketData.purchased,
+        ticketData.issued,
+        ticketData.redeemed,
+        ("tierUri" in ticketData)?ticketData.tierUri:ticketData.tier,
+        this._tierService
+      ))
+    });
   }
 }

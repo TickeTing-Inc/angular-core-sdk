@@ -46,21 +46,23 @@ export class TierService extends ModelService{
   }
 
   private _buildTier(tierData,self){
-    return new Tier(
-      ("self" in tierData)?self.getEndpoint(tierData["self"]):tierData["endpoint"],
-      tierData["title"],
-      tierData["description"],
-      tierData["local-price"],
-      tierData["quantity"],
-      tierData["reserved"],
-      tierData["sold"],
-      tierData["remaining"],
-      tierData["revenue"],
-      tierData["availability"],
-      tierData["validity"],
-      tierData["exclusive"],
-      tierData["local-convenience"],
-      self._connection
-    );
+    return Observable.create(observer => {
+      observer.next(new Tier(
+        ("self" in tierData)?self.getEndpoint(tierData["self"]):tierData["endpoint"],
+        tierData["title"],
+        tierData["description"],
+        tierData["local-price"],
+        tierData["quantity"],
+        tierData["reserved"],
+        tierData["sold"],
+        tierData["remaining"],
+        tierData["revenue"],
+        tierData["availability"],
+        tierData["validity"],
+        tierData["exclusive"],
+        tierData["local-convenience"],
+        self._connection
+      ));
+    });
   }
 }

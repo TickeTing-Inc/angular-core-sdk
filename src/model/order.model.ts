@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs/Observable';
+import { Subscriber } from 'rxjs/Subscriber';
 import { Profile} from './profile.model';
 import { Tier } from './tier.model';
 import { Connection } from './connection.model';
@@ -14,14 +15,14 @@ export class Order{
   private _items: Array<{tier: Tier, amount: number}>;
   private "local-total": number;
   private "share-data": boolean;
-  private _itemsObservers: Array<any>;
+  private _itemsObservers: Array<Subscriber<any>>;
 
   constructor(public endpoint: string, public number: string, private status: string, private reason: string,
               total: number, shareable: boolean, public device: string, public os: string,
               public version: string, public created: Date, public expires: Date, public closed: Date,
               private _merchant: any, private _agent: any, private _ticketService: TicketService,
               private _tierService: TierService,_connectionService: ConnectionService,
-              private _cacheService: CacheService, private _baseUrl: string){
+              private _cacheService: CacheService, private _baseUrl: string, private observer: Subscriber<any>){
     this.created = new Date(created);
     this.expires = new Date(expires);
     this.closed = new Date(closed);
@@ -42,11 +43,11 @@ export class Order{
   }
 
   get merchant(): string{
-    return this._merchant.name;
+    return this._merchant?this._merchant.name:"";
   }
 
   get agent(): string{
-    return this._agent.username;
+    return this._agent?this._agent.username:"";
   }
 
   isShareable(): boolean{
@@ -172,6 +173,7 @@ export class Order{
                     self.reason = order.reason;
                     self['share-data'] = order['share-data'];
                     self['local-total'] = order['local-total'];
+                    this.observer.next(self);
 
                     observer.next(true);
                   },
@@ -205,6 +207,8 @@ export class Order{
             self.reason = order.reason;
             self['share-data'] = order['share-data'];
             self['local-total'] = order['local-total'];
+            this.observer.next(self);
+
             observer.next(true);
           },
           error => {
@@ -230,6 +234,8 @@ export class Order{
             if(payment.result == "Success"){
               self.status = "Fulfilled";
               self.reason = "Order paid in full.";
+              this.observer.next(self);
+
               observer.next(true);
             }else{
               observer.next(false);
@@ -270,6 +276,8 @@ export class Order{
             if(transactions[0].result == "Success"){
               self.status = "Fulfilled";
               self.reason = "Order paid in full.";
+              this.observer.next(self);
+
               observer.next(true);
             }else{
               observer.next(false);
@@ -306,19 +314,19 @@ export class Order{
   }
 
   private _getItems(register: boolean = true): Observable<Array<{tier: Tier, amount: number}>>{
-      return Observable.create(observer => {
-        if(this._items){
-          observer.next(this._items);
-        }else{
-          this._loadItems().subscribe(items => {
-            observer.next(items);
-          })
-        }
+    return Observable.create(observer => {
+      if(this._items){
+        observer.next(this._items);
+      }else{
+        this._loadItems().subscribe(items => {
+          observer.next(items);
+        })
+      }
 
-        if(register){
-          this._itemsObservers.push(observer);
-        }
-      });
+      if(register){
+        this._itemsObservers.push(observer);
+      }
+    });
   }
 
   private _loadItems(): Observable<Array<{tier: Tier, amount: number}>>{
@@ -352,13 +360,14 @@ export class Order{
                       })
                     }
                   }else{
+                    self._items = details;
                     internalObserver.next(details);
                   }
               })
           })
         },
         orderItems => {
-          return orderItems;
+          return Observable.of(orderItems);
         },self.isActive()?60:604800).subscribe(items => {
           if(self._cacheService.isValid(cacheKey)){
             observer.next(items);

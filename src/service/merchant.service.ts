@@ -68,15 +68,17 @@ export class MerchantService extends ModelService{
   }
 
   private _buildMerchant(merchantData: any, self: any){
-    return new Merchant(
-      ("self" in merchantData)?self.getEndpoint(merchantData["self"]):merchantData["endpoint"],
-      merchantData["name"],
-      merchantData["registered"],
-      merchantData["active"],
-      self._cacheService,
-      self._connectionService,
-      self._orderService,
-      self._profileService
-    );
+    return Observable.create(observer => {
+      observer.next(new Merchant(
+        ("self" in merchantData)?self.getEndpoint(merchantData["self"]):merchantData["endpoint"],
+        merchantData["name"],
+        merchantData["registered"],
+        merchantData["active"],
+        self._cacheService,
+        self._connectionService,
+        self._orderService,
+        self._profileService
+      ))
+    })
   }
 }

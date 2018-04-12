@@ -28,12 +28,14 @@ export class XpressCardService extends ModelService{
         return self._connection.get(profile.endpoint+"/xpress")
       },
       xpressCardData => {
-        return new XpressCard(
-          ("self" in xpressCardData)?self.getEndpoint(xpressCardData["self"]):xpressCardData["endpoint"],
-          xpressCardData["serial"],
-          xpressCardData["activated"],
-          xpressCardData["enabled"]
-        );
+        return Observable.create(observer => {
+          observer.next(new XpressCard(
+            ("self" in xpressCardData)?self.getEndpoint(xpressCardData["self"]):xpressCardData["endpoint"],
+            xpressCardData["serial"],
+            xpressCardData["activated"],
+            xpressCardData["enabled"]
+          ))
+        });
       },3600);
   }
 }
