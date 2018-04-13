@@ -1,21 +1,26 @@
 <h1>Demo Order Console</h1>
-<h3>Order #{{order?.number}}</h3>
-<div>Status: {{order?.status}}</div>
-<div>Reason: {{order?.reason}}</div>
-<div>Merchant: {{order?.merchant}}</div>
-<h4>Items</h4>
-<div *ngFor="let item of order?.items | async">
-  <div>{{item?.amount}}x {{item?.tier?.title}}</div>
+<div *ngIf="order">
+  <h3>Order #{{order?.number}}</h3>
+  <div>Status: {{order?.status}}</div>
+  <div>Reason: {{order?.reason}}</div>
+  <div>Merchant: {{order?.merchant}}</div>
+  <h4>Items</h4>
+  <div *ngFor="let item of order?.items | async">
+    <div>{{item?.amount}}x {{item?.tier?.title}}</div>
+  </div>
+</div>
+<div *ngIf="!order">
+  {{profile?.fullName}} has no active orders. Place one below
 </div>
 <br /><br />
 <div>
 <button (click)='createOrder()'>Open Order</button>
-<button (click)='addToOrder()'>Add To Order</button>
-<button (click)='removeFromOrder()'>Remove From Order</button>
-<button (click)='clearOrder()'>Clear Order</button>
-<button (click)='confirm()'>Confirm</button>
-<button (click)='cancel()'>Cancel</button>
-<button (click)='cashSettle()'>Cash Settle</button>
-<button (click)='cardSettle()'>Card Settle</button>
-<button (click)='sendReceipt()'>Send Receipt</button>
+<button *ngIf="order" (click)='addToOrder()'>Add To Order</button>
+<button *ngIf="order" (click)='removeFromOrder()'>Remove From Order</button>
+<button *ngIf="order" (click)='clearOrder()'>Clear Order</button>
+<button *ngIf="order" (click)='confirm()'>Confirm</button>
+<button *ngIf="order" (click)='cancel()'>Cancel</button>
+<button *ngIf="order" (click)='cashSettle()'>Cash Settle</button>
+<button *ngIf="order" (click)='cardSettle()'>Card Settle</button>
+<button *ngIf="order" (click)='sendReceipt()'>Send Receipt</button>
 </div>

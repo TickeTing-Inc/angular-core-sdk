@@ -26,12 +26,17 @@ export class CacheService extends Service{
         let storedValue = self._retrieve(key);
         if(storedValue instanceof Array){
           let builtValues = [];
-          for(let i=0; i < storedValue.length; i++){
-            builder(storedValue[i]).subscribe(storedValue => {
-              builtValues[i] = storedValue;
-              self._store(key,builtValues,(self._cache.get(key).expiry - this._now())/1000);
-              observer.next(builtValues);
-            })
+          if(storedValue.length > 0){
+            for(let i=0; i < storedValue.length; i++){
+              builder(storedValue[i]).subscribe(storedValue => {
+                builtValues[i] = storedValue;
+                self._store(key,builtValues,(self._cache.get(key).expiry - this._now())/1000);
+                observer.next(builtValues);
+              })
+            }
+          }else{
+            self._store(key,storedValue,(self._cache.get(key).expiry - this._now())/1000);
+            observer.next(storedValue);
           }
         }else{
           builder(storedValue).subscribe(value => {
@@ -43,16 +48,22 @@ export class CacheService extends Service{
         observer.next([]);
       }
 
-      if(!self.has(key) || self.isExpired(key)){
+      if(!self.has(key) || self.isExpired(key) || self._retrieve(key) === null
+          || (self._retrieve(key) instanceof Array && self._retrieve(key).length == 0)){
         replacement().subscribe(newValue => {
           if(newValue instanceof Array){
             let values = [];
-            for(let i=0; i < newValue.length; i++){
-              builder(newValue[i]).subscribe(newValue => {
-                values[i] = newValue;
-                self._store(key,values,ttl);
-                observer.next(values);
-              });
+            if(newValue.length > 0){
+              for(let i=0; i < newValue.length; i++){
+                builder(newValue[i]).subscribe(newValue => {
+                  values[i] = newValue;
+                  self._store(key,values,ttl);
+                  observer.next(values);
+                });
+              }
+            }else{
+              self._store(key,newValue,ttl);
+              observer.next(newValue);
             }
           }else{
             builder(newValue).subscribe(newValue => {

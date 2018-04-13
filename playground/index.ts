@@ -25,7 +25,7 @@ class AppComponent {
 
       _profileService.getByUsername("svengineer").subscribe(profile => {
         this.profile = profile;
-        _orderService.getLastOrder().subscribe(order =>{
+        profile.getActiveOrder().subscribe(order =>{
           this.order = order;
         })
       })

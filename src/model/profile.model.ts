@@ -127,6 +127,10 @@ export class Profile{
     return this._orderService.listForProfile(this,page,records);
   }
 
+  getActiveOrder(): Observable<Order>{
+    return this._orderService.getActiveForProfile(this);
+  }
+
   placeOrder(device: string = "", os: string = "", version: string = ""): Observable<Order>{
     return this._orderService.createForProfile(this,device,os,version);
   }
