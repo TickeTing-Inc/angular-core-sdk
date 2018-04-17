@@ -15,10 +15,11 @@ export class Order{
   private _items: Array<{tier: Tier, amount: number}>;
   private "local-total": number;
   private "share-data": boolean;
+  private "xpress-card": string;
   private _itemsObservers: Array<Subscriber<any>>;
 
   constructor(public endpoint: string, public number: string, private status: string, private reason: string,
-              total: number, shareable: boolean, public device: string, public os: string,
+              total: number, shareable: boolean, xpressCard: string, public device: string, public os: string,
               public version: string, public created: Date, public expires: Date, public closed: Date,
               private _merchant: any, private _agent: any, private _ticketService: TicketService,
               private _tierService: TierService,_connectionService: ConnectionService,
@@ -28,6 +29,7 @@ export class Order{
     this.closed = new Date(closed);
     this['local-total'] = total;
     this['share-data'] = shareable;
+    this['xpress-card'] = xpressCard;
     this.items = this._getItems();
 
     this._connection = _connectionService.openConnection();
@@ -48,6 +50,10 @@ export class Order{
 
   get agent(): string{
     return this._agent?this._agent.username:"";
+  }
+
+  get xpress(): string{
+    return this['xpress-card'];
   }
 
   isShareable(): boolean{

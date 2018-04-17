@@ -4,6 +4,7 @@
   <div>Status: {{order?.status}}</div>
   <div>Reason: {{order?.reason}}</div>
   <div>Merchant: {{order?.merchant}}</div>
+  <div>Xpress: {{order?.xpress}}</div>
   <h4>Items</h4>
   <div *ngFor="let item of order?.items | async">
     <div>{{item?.amount}}x {{item?.tier?.title}}</div>

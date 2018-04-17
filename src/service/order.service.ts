@@ -24,13 +24,19 @@ export class OrderService extends ModelService{
     this._lastOrder = localStorage.getItem("last-order:@ticketing/angular-core-sdk");
   }
 
-  listForProfile(profile: Profile, page: number, records: number, statuses: Array<string> = []): Observable<Array<Order>>{
+  listForProfile(profile: Profile, page: number, records: number,
+                  statuses: Array<string> = []): Observable<Array<Order>>{
     return this._list(page,records,profile,null,"","",statuses);
   }
 
   listForMerchant(merchant: Merchant, page: number, records: number, startDate: string = "", endDate: string = "",
                     statuses: Array<string>, profile: Profile = null): Observable<Array<Order>>{
     return this._list(page,records,profile,merchant,startDate,endDate,statuses);
+  }
+
+  countForMerchant(merchant: Merchant, startDate: string = "", endDate: string = "", statuses: Array<string>,
+                    profile: Profile = null): Observable<number>{
+    return this._count(profile,merchant,startDate,endDate,statuses);
   }
 
   createForProfile(profile: Profile, device: string = "", os: string = "",
@@ -79,7 +85,8 @@ export class OrderService extends ModelService{
   }
 
   private _list(page: number, records: number, profile: Profile = null, merchant: Merchant = null,
-                  startDate: string = "", endDate: string = "", statuses: Array<string> = [], ttl: number = 60): Observable<Array<Order>>{
+                  startDate: string = "", endDate: string = "", statuses: Array<string> = [],
+                  ttl: number = 60): Observable<Array<Order>>{
     let queryParameters = {
       page: page,
       records: records,
@@ -124,6 +131,42 @@ export class OrderService extends ModelService{
       },ttl);
   }
 
+  private _count(profile: Profile = null, merchant: Merchant = null, startDate: string = "",
+                  endDate: string = "", statuses: Array<string> = []): Observable<number>{
+    let queryParameters = {
+      page: 1,
+      records: 1
+    }
+
+    if(profile){
+      queryParameters['profile'] = profile.endpoint.match(/([0-9]{14}$)/)[1];
+    }
+
+    if(merchant){
+      queryParameters['merchant'] = merchant.endpoint.match(/([0-9]{14}$)/)[1];
+    }
+
+    if(startDate){
+      queryParameters['from'] = startDate;
+    }
+
+    if(endDate){
+      queryParameters['to'] = endDate;
+    }
+
+    if(statuses){
+      queryParameters['statuses'] = statuses.join(",");
+    }
+
+    return Observable.create(observer => {
+      this._connection.get("/orders",queryParameters)
+        .map(response => response.total)
+        .subscribe(orderCount => {
+          observer.next(orderCount);
+        })
+    })
+  }
+
   private _buildOrder(orderData,self){
     return Observable.create(observer => {
       observer.next(new Order(
@@ -133,6 +176,7 @@ export class OrderService extends ModelService{
         orderData.reason,
         orderData['local-total'],
         orderData['share-data'],
+        orderData['xpress-card'],
         orderData.device,
         orderData.os,
         orderData.version,
