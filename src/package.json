@@ -1,6 +1,6 @@
 {
   "name": "@ticketing/angular-core-sdk",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/TickeTing-Inc/angular-core-sdk"
