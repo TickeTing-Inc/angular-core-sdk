@@ -22,8 +22,12 @@ export class EventService extends ModelService{
     super(_configService,_connectionService);
   }
 
-  listUpcoming(page: number, records: number): Observable<Array<Event>>{
-    return this._list(page,records,{upcoming:true,public:true,sort:"date",order:"asc"});
+  listUpcoming(page: number, records: number, title: string = "", order: string = "asc"): Observable<Array<Event>>{
+    return this._list(page,records,{upcoming:true,public:true,sort:"date",order:order,title:title});
+  }
+
+  countUpcoming(): Observable<number>{
+    return this._count({upcoming:true,public:true,sort:"date",order:"asc"});
   }
 
   listForTitle(title: string, page: number, records: number): Observable<Array<Event>>{
@@ -53,7 +57,9 @@ export class EventService extends ModelService{
     }
 
     for(let parameter in parameters){
-      queryParameters[parameter] = parameters[parameter];
+      if(parameters[parameter]){
+        queryParameters[parameter] = parameters[parameter];
+      }
     }
 
     let cacheKey = prefix+"/events?"+JSON.stringify(queryParameters);
@@ -66,6 +72,25 @@ export class EventService extends ModelService{
       eventData => {
         return self._buildEvent(eventData,self);
       },3600);
+  }
+
+  private _count(parameters: any = {}): Observable<number>{
+    let queryParameters = {
+      page: 1,
+      records: 1
+    }
+
+    for(let parameter in parameters){
+      queryParameters[parameter] = parameters[parameter];
+    }
+
+    return Observable.create(observer => {
+      this._connection.get("/events",queryParameters)
+        .map(response => response.total)
+        .subscribe(count => {
+          observer.next(count);
+        })
+      })
   }
 
   private _listForProfile(profile: Profile, type: string, ttl: number): Observable<Array<Event>>{

@@ -25,15 +25,23 @@ export class CacheService extends Service{
       if(self.has(key)){
         let storedValue = self._retrieve(key);
         if(storedValue instanceof Array){
-          let builtValues = [];
           if(storedValue.length > 0){
-            for(let i=0; i < storedValue.length; i++){
-              builder(storedValue[i]).subscribe(storedValue => {
-                builtValues[i] = storedValue;
-                self._store(key,builtValues,(self._cache.get(key).expiry - this._now())/1000);
-                observer.next(builtValues);
-              })
-            }
+            Observable.create(buildObserver => {
+              let builtValues = [];
+              let builtCount = 0;
+              for(let i=0; i < storedValue.length; i++){
+                builder(storedValue[i]).subscribe(builtValue => {
+                  builtValues[i] = builtValue;
+                  builtCount++;
+                  if(builtCount == storedValue.length){
+                    buildObserver.next(builtValues);
+                  }
+                })
+              }
+            }).subscribe(builtValues => {
+              self._store(key,builtValues,(self._cache.get(key).expiry - this._now())/1000);
+              observer.next(builtValues);
+            })
           }else{
             self._store(key,storedValue,(self._cache.get(key).expiry - this._now())/1000);
             observer.next(storedValue);
@@ -52,15 +60,23 @@ export class CacheService extends Service{
           || (self._retrieve(key) instanceof Array && self._retrieve(key).length == 0)){
         replacement().subscribe(newValue => {
           if(newValue instanceof Array){
-            let values = [];
             if(newValue.length > 0){
-              for(let i=0; i < newValue.length; i++){
-                builder(newValue[i]).subscribe(newValue => {
-                  values[i] = newValue;
-                  self._store(key,values,ttl);
-                  observer.next(values);
-                });
-              }
+              Observable.create(buildObserver => {
+                let builtValues = [];
+                let builtCount = 0;
+                for(let i=0; i < newValue.length; i++){
+                  builder(newValue[i]).subscribe(builtValue => {
+                    builtValues[i] = builtValue;
+                    builtCount++;
+                    if(builtCount == newValue.length){
+                      buildObserver.next(builtValues);
+                    }
+                  })
+                }
+              }).subscribe(builtValues => {
+                self._store(key,builtValues,ttl);
+                observer.next(builtValues);
+              })
             }else{
               self._store(key,newValue,ttl);
               observer.next(newValue);

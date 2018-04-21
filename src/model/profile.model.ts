@@ -131,8 +131,8 @@ export class Profile{
     return this._orderService.getActiveForProfile(this);
   }
 
-  placeOrder(device: string = "", os: string = "", version: string = ""): Observable<Order>{
-    return this._orderService.createForProfile(this,device,os,version);
+  placeOrder(device: string = "", os: string = "", version: string = "", merchant: string = ""): Observable<Order>{
+    return this._orderService.createForProfile(this,device,os,version,merchant);
   }
 
   private _getXpressCard(): Observable<XpressCard>{

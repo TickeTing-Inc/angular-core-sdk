@@ -9,6 +9,8 @@
   <div *ngFor="let item of order?.items | async">
     <div>{{item?.amount}}x {{item?.tier?.title}}</div>
   </div>
+  <h4>Order Total</h4>
+  <div>${{order?.total}}</div>
 </div>
 <div *ngIf="!order">
   {{profile?.fullName}} has no active orders. Place one below

@@ -10,6 +10,8 @@ import { ConnectionService } from '../service/connection.service';
 import { CacheService } from '../service/cache.service';
 
 export class Order{
+  private MAX_ITEMS: number = 10;
+
   public items: Observable<Array<{tier: Tier, amount: number}>>;
   private _connection: Connection;
   private _items: Array<{tier: Tier, amount: number}>;
@@ -17,6 +19,7 @@ export class Order{
   private "share-data": boolean;
   private "xpress-card": string;
   private _itemsObservers: Array<Subscriber<any>>;
+  private _itemCount: number;
 
   constructor(public endpoint: string, public number: string, private status: string, private reason: string,
               total: number, shareable: boolean, xpressCard: string, public device: string, public os: string,
@@ -34,6 +37,7 @@ export class Order{
 
     this._connection = _connectionService.openConnection();
     this._itemsObservers = [];
+    this._itemCount = 0;
   }
 
   get total(){
@@ -77,7 +81,7 @@ export class Order{
   }
 
   addItems(tier: Tier, amount: number): Observable<boolean>{
-    if(!this.isOpen()){
+    if(!this.isOpen() || (this._itemCount + amount) > this.MAX_ITEMS){
       return Observable.of(false);
     }
 
@@ -101,6 +105,13 @@ export class Order{
           })
         }
 
+        this._itemCount += amount;
+
+        self['local-total'] = +((self['local-total'] + (tier.price * amount)).toFixed(2));
+        if(this._isAppOrder()){
+          self['local-total'] = +((self['local-total'] + (tier.convenienceFee * amount)).toFixed(2));
+        }
+
         this._emitItems();
         observer.next(true);
       })
@@ -108,7 +119,7 @@ export class Order{
   }
 
   removeItems(tier: Tier, amount: number): Observable<boolean>{
-    if(!this.isOpen()){
+    if(!this.isOpen() || (this._itemCount - amount) < 0){
       return Observable.of(false);
     }
 
@@ -132,6 +143,13 @@ export class Order{
           self._items.splice(oldTier,1);
         }
 
+        this._itemCount -= amount;
+
+        self['local-total'] = +((self['local-total'] - (tier.price * amount)).toFixed(2));
+        if(this._isAppOrder()){
+          self['local-total'] = +((self['local-total'] - (tier.convenienceFee * amount)).toFixed(2));
+        }
+
         self._emitItems();
         observer.next(true);
       })
@@ -146,6 +164,9 @@ export class Order{
     let self = this;
     return Observable.create(observer => {
       self._getItems(false).subscribe(items => {
+        this['local-total'] = 0;
+        this._itemCount = 0;
+
         self._items = items;
         self._items.splice(0,self._items.length);
         self._emitItems();
@@ -386,5 +407,9 @@ export class Order{
     for(let i=0; i < this._itemsObservers.length; i++){
       this._itemsObservers[i].next(this._items);
     }
+  }
+
+  private _isAppOrder(): boolean{
+    return this.merchant == "TickeTing Events App";
   }
 }

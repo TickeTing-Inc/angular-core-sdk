@@ -40,15 +40,21 @@ export class OrderService extends ModelService{
   }
 
   createForProfile(profile: Profile, device: string = "", os: string = "",
-                    version: string = ""): Observable<Order>{
+                    version: string = "", merchant: string = ""): Observable<Order>{
     let self = this;
+    let payload = {
+      'share-data':true,
+      'device':device,
+      'os':os,
+      'version':version
+    }
+
+    if(merchant){
+      payload['merchant'] = merchant;
+    }
+    
     return Observable.create(observer => {
-      self._connection.post(profile.endpoint+"/orders",{
-        'share-data':true,
-        'device':device,
-        'os':os,
-        'version':version
-      }).subscribe(
+      self._connection.post(profile.endpoint+"/orders",payload).subscribe(
         orderData => {
           let cacheKey = this.getEndpoint(orderData.self);
           self._cacheService.retrieve(cacheKey,
@@ -60,7 +66,9 @@ export class OrderService extends ModelService{
             orderData => {
               return self._buildOrder(orderData,self);
             },60).subscribe(order => {
-              observer.next(order);
+              if(order instanceof Order){
+                observer.next(order);
+              }
             })
         },
         error => {

@@ -2,6 +2,8 @@ import { Connection } from './connection.model';
 import { Observable } from 'rxjs/Observable';
 
 export class Tier{
+  public hasOptions: Observable<boolean>;
+
   private 'local-price': number;
   private 'local-convenience': number;
 
@@ -11,6 +13,7 @@ export class Tier{
                 convenienceFee: number, private _connection: Connection){
     this['local-price'] = price;
     this['local-convenience'] = convenienceFee;
+    this.hasOptions = this._hasOptions();
   }
 
   get price(): number{
@@ -21,7 +24,7 @@ export class Tier{
     return this['local-convenience'];
   }
 
-  hasOptions(): Observable<boolean>{
+  private _hasOptions(): Observable<boolean>{
     return this._connection.get(this.endpoint+"/options")
       .switchMap(response => {
         return Observable.of(response.options.length > 0);

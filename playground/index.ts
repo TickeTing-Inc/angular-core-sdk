@@ -19,15 +19,19 @@ class AppComponent {
 
   constructor(_profileService: ProfileService, _eventService: EventService, private _orderService: OrderService){
     _eventService.listUpcoming(1,1).subscribe(events => {
-      events[0].tiers.subscribe(tiers => {
-        this.tier = tiers[0];
-      })
+      if(events.length > 0){
+        events[0].tiers.subscribe(tiers => {
+          this.tier = tiers[0];
+        })
+      }
 
       _profileService.getByUsername("svengineer").subscribe(profile => {
         this.profile = profile;
-        profile.getActiveOrder().subscribe(order =>{
-          this.order = order;
-        })
+        if(profile){
+          profile.getActiveOrder().subscribe(order =>{
+            this.order = order;
+          })
+        }
       })
     })
   }
