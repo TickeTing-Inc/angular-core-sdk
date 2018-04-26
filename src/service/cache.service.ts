@@ -52,8 +52,6 @@ export class CacheService extends Service{
             observer.next(value);
           })
         }
-      }else{
-        observer.next([]);
       }
 
       if(!self.has(key) || self.isExpired(key) || self._retrieve(key) === null

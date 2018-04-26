@@ -26,8 +26,8 @@ export class EventService extends ModelService{
     return this._list(page,records,{upcoming:true,public:true,sort:"date",order:order,title:title});
   }
 
-  countUpcoming(): Observable<number>{
-    return this._count({upcoming:true,public:true,sort:"date",order:"asc"});
+  countUpcoming(title: string = ""): Observable<number>{
+    return this._count({upcoming:true,public:true,sort:"date",order:"asc",title:title});
   }
 
   listForTitle(title: string, page: number, records: number): Observable<Array<Event>>{
@@ -46,8 +46,14 @@ export class EventService extends ModelService{
     return this._listForProfile(profile,"attended",86400);
   }
 
-  listForTier(tier: Tier){
-    return this._list(1,1,{},tier.endpoint);
+  listForTier(tier: Tier | string){
+    let endpoint = "";
+    if(typeof tier == "string"){
+      endpoint = this.getEndpoint(tier)
+    }else{
+      endpoint = tier.endpoint;
+    }
+    return this._list(1,1,{},endpoint);
   }
 
   private _list(page: number, records: number, parameters: any = {}, prefix: string = ""): Observable<Array<Event>>{
@@ -71,7 +77,7 @@ export class EventService extends ModelService{
       },
       eventData => {
         return self._buildEvent(eventData,self);
-      },3600);
+      },1);
   }
 
   private _count(parameters: any = {}): Observable<number>{

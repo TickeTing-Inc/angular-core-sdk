@@ -20,9 +20,10 @@ import { Order } from '../model/order.model';
 
 @Injectable()
 export class ProfileService extends ModelService{
-  constructor(_configService: ConfigService, private _cacheService: CacheService, private _eventService: EventService,
-                private _xpressCardService: XpressCardService, private _ticketService: TicketService,
-                private _orderService: OrderService, _connectionService: ConnectionService){
+  constructor(_configService: ConfigService, private _cacheService: CacheService,
+                private _eventService: EventService, private _xpressCardService: XpressCardService,
+                private _ticketService: TicketService, private _orderService: OrderService,
+                _connectionService: ConnectionService, private _tierService: TierService){
     super(_configService, _connectionService);
   }
 
@@ -106,10 +107,12 @@ export class ProfileService extends ModelService{
         profileData["email"],
         profileData["phone"],
         profileData["active"],
+        profileData["guest"],
         self._eventService,
         self._xpressCardService,
         self._ticketService,
-        self._orderService
+        self._orderService,
+        self._tierService
       ));
     })
   }

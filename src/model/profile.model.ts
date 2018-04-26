@@ -1,11 +1,13 @@
 import { EventService } from '../service/event.service';
 import { XpressCardService } from '../service/xpress-card.service';
 import { TicketService } from '../service/ticket.service';
+import { TierService } from '../service/tier.service';
 import { OrderService } from '../service/order.service';
 
 import { XpressCard } from './xpress-card.model';
 import { Event } from './event.model';
 import { Order } from './order.model';
+import { Tier } from './tier.model';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -20,9 +22,10 @@ export class Profile{
 
   constructor(public endpoint: string, private created: Date, public title: string, firstName: string,
                 lastName: string, public username: string, private dob: Date, public country: string,
-                public email: string, public phone: string, public active: boolean,
+                public email: string, public phone: string, public active: boolean, public guest: boolean,
                 private _eventService: EventService, private _xpressCardService: XpressCardService,
-                private _ticketService: TicketService, private _orderService: OrderService){
+                private _ticketService: TicketService, private _orderService: OrderService,
+                private _tierService: TierService){
       this['first-name'] = firstName;
       this['last-name'] = lastName;
 
@@ -57,27 +60,43 @@ export class Profile{
     let self = this;
     return Observable.create(observer => {
       this._ticketService.listForProfile(self,status,event).subscribe(tickets => {
-        let ticketsProcessed = 0;
         let groupedTickets = {};
         let entityMap = {};
+        let tierTickets = {};
+
+        for(let i=0; i < tickets.length; i++){
+          if(!(tickets[i].tierUri in tierTickets)){
+            tierTickets[tickets[i].tierUri] = [];
+          }
+          tierTickets[tickets[i].tierUri].push(tickets[i]);
+        }
 
         if(groupBy == "tier"){
-          for(let i=0; i < tickets.length; i++){
-            tickets[i].tier.subscribe(tier => {
+          let tiersProcessed = 0;
+          for(let tierURI in tierTickets){
+            self._tierService.getByUri(tierURI).subscribe((tier: Tier) => {
               if(!(tier.endpoint in entityMap)){
                 groupedTickets[tier.endpoint] = [];
                 entityMap[tier.endpoint] = tier;
               }
 
-              groupedTickets[tier.endpoint].push(tickets[i]);
-              ticketsProcessed++;
+              for(let i=0; i < tierTickets[tierURI].length; i++){
+                groupedTickets[tier.endpoint].push(tierTickets[tierURI][i]);
+              }
 
-              if(ticketsProcessed == tickets.length){
+              tiersProcessed++;
+
+              if(tiersProcessed == Object.keys(tierTickets).length){
                 let groups = [];
                 for(let tier in groupedTickets){
+                  let tierTickets = [];
+                  for(let i=0; i < groupedTickets[tier].length; i++){
+                    tierTickets.push(groupedTickets[tier][i]);
+                  }
+
                   groups.push({
                     tier:entityMap[tier],
-                    tickets:groupedTickets[tier]
+                    tickets:tierTickets
                   });
                 }
 
@@ -86,32 +105,38 @@ export class Profile{
             })
           }
         }else if(groupBy == "event"){
-          for(let i=0; i < tickets.length; i++){
-            tickets[i].tier.subscribe(tier => {
-              this._eventService.listForTier(tier).subscribe(events => {
-                for(let j=0; j < events.length; j++){
-                  let event = events[j];
-                  if(!(event.endpoint in entityMap)){
-                    groupedTickets[event.endpoint] = [];
-                    entityMap[event.endpoint] = event;
-                  }
-
-                  groupedTickets[event.endpoint].push(tickets[i]);
+          let tiersProcessed = 0;
+          for(let tier in tierTickets){
+            this._eventService.listForTier(tier).subscribe(events => {
+              for(let i=0; i < events.length; i++){
+                let event = events[i];
+                if(!(event.endpoint in entityMap)){
+                  groupedTickets[event.endpoint] = [];
+                  entityMap[event.endpoint] = event;
                 }
 
-                ticketsProcessed++;
-                if(ticketsProcessed == tickets.length){
-                  let groups = [];
-                  for(let event in groupedTickets){
-                    groups.push({
-                      event:entityMap[event],
-                      tickets:groupedTickets[event]
-                    });
+                for(let j=0; j < tierTickets[tier].length; j++){
+                  groupedTickets[event.endpoint].push(tierTickets[tier][j]);
+                }
+              }
+
+              tiersProcessed++;
+              if(tiersProcessed == Object.keys(tierTickets).length){
+                let groups = [];
+                for(let event in groupedTickets){
+                  let eventTickets = [];
+                  for(let i=0; i < groupedTickets[event].length; i++){
+                    eventTickets.push(groupedTickets[event][i]);
                   }
 
-                  observer.next(groups);
+                  groups.push({
+                    event:entityMap[event],
+                    tickets:eventTickets
+                  });
                 }
-              })
+
+                observer.next(groups);
+              }
             })
           }
         }else{
@@ -131,7 +156,8 @@ export class Profile{
     return this._orderService.getActiveForProfile(this);
   }
 
-  placeOrder(device: string = "", os: string = "", version: string = "", merchant: string = ""): Observable<Order>{
+  placeOrder(device: string = "", os: string = "", version: string = "",
+              merchant: string = ""): Observable<Order>{
     return this._orderService.createForProfile(this,device,os,version,merchant);
   }
 

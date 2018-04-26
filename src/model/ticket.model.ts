@@ -7,7 +7,7 @@ export class Ticket{
   public tier: Observable<Tier>;
 
   constructor(public endpoint: string, public serial: string, public status: string, private purchased: Date,
-              private issued: Date, private redeemed: Date, private tierUri: string, private _tierService: TierService){
+              private issued: Date, private redeemed: Date, public tierUri: string, private _tierService: TierService){
     this.purchased = new Date(purchased);
     this.issued = new Date(issued);
     this.redeemed = new Date(redeemed);

@@ -38,7 +38,7 @@ export class TicketService extends ModelService{
       },
       ticketData => {
         return self._buildTicket(ticketData,self);
-      },180);
+      },60);
   }
 
   private _buildTicket(ticketData, self): Ticket{

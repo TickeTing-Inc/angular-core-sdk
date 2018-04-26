@@ -19,7 +19,6 @@ export class Order{
   private "share-data": boolean;
   private "xpress-card": string;
   private _itemsObservers: Array<Subscriber<any>>;
-  private _itemCount: number;
 
   constructor(public endpoint: string, public number: string, private status: string, private reason: string,
               total: number, shareable: boolean, xpressCard: string, public device: string, public os: string,
@@ -37,7 +36,6 @@ export class Order{
 
     this._connection = _connectionService.openConnection();
     this._itemsObservers = [];
-    this._itemCount = 0;
   }
 
   get total(){
@@ -81,7 +79,7 @@ export class Order{
   }
 
   addItems(tier: Tier, amount: number): Observable<boolean>{
-    if(!this.isOpen() || (this._itemCount + amount) > this.MAX_ITEMS){
+    if(!this.isOpen()){
       return Observable.of(false);
     }
 
@@ -90,36 +88,42 @@ export class Order{
       self._getItems(false).subscribe(items => {
         self._items = items;
 
-        let newTier = true;
+        let itemIndex = -1;
         for(let i=0; i < self._items.length; i++){
           if(self._items[i].tier.endpoint == tier.endpoint){
-            newTier = false;
-            self._items[i].amount += Math.min(amount,10-self._items[i].amount);
+            itemIndex = i;
+            break;
           }
         }
 
-        if(newTier){
+        if(itemIndex < 0){
           self._items.push({
             tier: tier,
-            amount: amount
-          })
+            amount: 0
+          });
+
+          itemIndex = self._items.length-1;
         }
 
-        this._itemCount += amount;
+        if((self._items[itemIndex].amount + amount) <= Math.min(tier.remaining,this.MAX_ITEMS)){
+          self._items[itemIndex].amount += Math.min(amount,this.MAX_ITEMS-self._items[itemIndex].amount);
 
-        self['local-total'] = +((self['local-total'] + (tier.price * amount)).toFixed(2));
-        if(this._isAppOrder()){
-          self['local-total'] = +((self['local-total'] + (tier.convenienceFee * amount)).toFixed(2));
+          self['local-total'] = +((self['local-total'] + (tier.price * amount)).toFixed(2));
+          if(this._isAppOrder() && tier.price > 0){
+            self['local-total'] = +((self['local-total'] + (tier.convenienceFee * amount)).toFixed(2));
+          }
+
+          this._emitItems();
+          observer.next(true);
+        }else{
+          observer.next(false);
         }
-
-        this._emitItems();
-        observer.next(true);
       })
     })
   }
 
   removeItems(tier: Tier, amount: number): Observable<boolean>{
-    if(!this.isOpen() || (this._itemCount - amount) < 0){
+    if(!this.isOpen()){
       return Observable.of(false);
     }
 
@@ -128,30 +132,30 @@ export class Order{
       self._getItems(false).subscribe(items => {
         self._items = items;
 
-        let oldTier = -1;
+        let itemIndex = -1;
         for(let i=0; i < self._items.length; i++){
           if(self._items[i].tier.endpoint == tier.endpoint){
-            self._items[i].amount -= amount;
-          }
-
-          if(self._items[i].amount <= 0){
-            oldTier = i;
+            itemIndex = i;
+            break;
           }
         }
 
-        if(oldTier >= 0){
-          self._items.splice(oldTier,1);
+        if(itemIndex >= 0 && this._items[itemIndex].amount >= amount){
+          self._items[itemIndex].amount -= amount;
+          if(self._items[itemIndex].amount <= 0){
+            self._items.splice(itemIndex,1);
+          }
+
+          self['local-total'] = +((self['local-total'] - (tier.price * amount)).toFixed(2));
+          if(this._isAppOrder() && tier.price > 0){
+            self['local-total'] = +((self['local-total'] - (tier.convenienceFee * amount)).toFixed(2));
+          }
+
+          self._emitItems();
+          observer.next(true);
+        }else{
+          observer.next(false);
         }
-
-        this._itemCount -= amount;
-
-        self['local-total'] = +((self['local-total'] - (tier.price * amount)).toFixed(2));
-        if(this._isAppOrder()){
-          self['local-total'] = +((self['local-total'] - (tier.convenienceFee * amount)).toFixed(2));
-        }
-
-        self._emitItems();
-        observer.next(true);
       })
     })
   }
@@ -165,7 +169,6 @@ export class Order{
     return Observable.create(observer => {
       self._getItems(false).subscribe(items => {
         this['local-total'] = 0;
-        this._itemCount = 0;
 
         self._items = items;
         self._items.splice(0,self._items.length);
