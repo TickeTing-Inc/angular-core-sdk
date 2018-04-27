@@ -88,11 +88,13 @@ export class Order{
       self._getItems(false).subscribe(items => {
         self._items = items;
 
+        let itemCount = 0;
         let itemIndex = -1;
         for(let i=0; i < self._items.length; i++){
           if(self._items[i].tier.endpoint == tier.endpoint){
             itemIndex = i;
-            break;
+          }else{
+            itemCount += self._items[i].amount;
           }
         }
 
@@ -105,7 +107,7 @@ export class Order{
           itemIndex = self._items.length-1;
         }
 
-        if((self._items[itemIndex].amount + amount) <= Math.min(tier.remaining,this.MAX_ITEMS)){
+        if((self._items[itemIndex].amount + amount) <= Math.min(tier.remaining,this.MAX_ITEMS-itemCount)){
           self._items[itemIndex].amount += Math.min(amount,this.MAX_ITEMS-self._items[itemIndex].amount);
 
           self['local-total'] = +((self['local-total'] + (tier.price * amount)).toFixed(2));
