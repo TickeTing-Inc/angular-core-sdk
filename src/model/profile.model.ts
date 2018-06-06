@@ -71,7 +71,9 @@ export class Profile{
           tierTickets[tickets[i].tierUri].push(tickets[i]);
         }
 
-        if(groupBy == "tier"){
+        if(tickets.length == 0){
+          observer.next([]);
+        }else if(groupBy == "tier"){
           let tiersProcessed = 0;
           for(let tierURI in tierTickets){
             self._tierService.getByUri(tierURI).subscribe((tier: Tier) => {

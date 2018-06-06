@@ -4,17 +4,26 @@ import { Subscriber } from 'rxjs/Subscriber';
 import { Service } from './service';
 import { Connection } from '../model/connection.model';
 
+const PURGE_CUTOFF: number = 604800; //One week until items are purged from cache
+
 @Injectable()
 export class CacheService extends Service{
-  private _cache: Map<string, {value: any, expiry: number}>;
+  private _cache: Map<string, {value: any, stored: number, expires: number}>;
+
   constructor(){
     super();
-    this._cache = new Map<string, {value: any, expiry: number}>();
+    this._cache = new Map<string, {value: any, stored: number, expires: number}>();
     let storedKeys = Object.keys(localStorage);
     for(let i=0; i < storedKeys.length; i++){
       let cacheKey = [];
+      let cachedValue = null;
       if(cacheKey = storedKeys[i].match(/^@ticketing\/angular\-core\-sdk:(.*)$/)){
-        this._cache.set(cacheKey[1],JSON.parse(localStorage.getItem(storedKeys[i])));
+        cachedValue = JSON.parse(localStorage.getItem(storedKeys[i]));
+        if(cachedValue.stored < this._now() - (PURGE_CUTOFF*1000)){
+          localStorage.removeItem(storedKeys[i]);
+        }else{
+          this._cache.set(cacheKey[1],cachedValue);
+        }
       }
     }
   }
@@ -39,16 +48,16 @@ export class CacheService extends Service{
                 })
               }
             }).subscribe(builtValues => {
-              self._store(key,builtValues,(self._cache.get(key).expiry - this._now())/1000);
+              self._store(key,builtValues,(self._cache.get(key).expires - this._now())/1000);
               observer.next(builtValues);
             })
           }else{
-            self._store(key,storedValue,(self._cache.get(key).expiry - this._now())/1000);
+            self._store(key,storedValue,(self._cache.get(key).expires - this._now())/1000);
             observer.next(storedValue);
           }
         }else{
           builder(storedValue).subscribe(value => {
-            self._store(key,value,(self._cache.get(key).expiry - this._now())/1000);
+            self._store(key,value,(self._cache.get(key).expires - this._now())/1000);
             observer.next(value);
           })
         }
@@ -99,7 +108,7 @@ export class CacheService extends Service{
   }
 
   isExpired(key: string): boolean{
-    return this.has(key)?this._now() > this._cache.get(key).expiry:false;
+    return this.has(key)?this._now() > this._cache.get(key).expires:false;
   }
 
   isValid(key: string): boolean{
@@ -129,7 +138,7 @@ export class CacheService extends Service{
       }
     }
 
-    let cacheValue = {value: persistantValue, expiry: this._now() + ttl*1000};
+    let cacheValue = {value: persistantValue, stored: this._now(), expires: this._now() + ttl*1000};
     this._cache.set(key,cacheValue);
     localStorage.setItem("@ticketing/angular-core-sdk:"+key,JSON.stringify(cacheValue));
   }

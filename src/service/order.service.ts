@@ -52,7 +52,7 @@ export class OrderService extends ModelService{
     if(merchant){
       payload['merchant'] = merchant;
     }
-    
+
     return Observable.create(observer => {
       self._connection.post(profile.endpoint+"/orders",payload).subscribe(
         orderData => {
@@ -72,9 +72,10 @@ export class OrderService extends ModelService{
             })
         },
         error => {
-          this.getActiveForProfile(profile).subscribe(order => {
-            observer.next(order);
-          })
+          this.getActiveForProfile(profile).subscribe(
+            order => {
+              observer.next(order);
+            })
         })
     })
   }
@@ -83,7 +84,7 @@ export class OrderService extends ModelService{
     let self = this;
     return Observable.create(observer => {
       self._list(1,1,profile,null,"","",['opened','confirmed'],1).subscribe(order => {
-        if(order){
+        if(order.length > 0){
           observer.next(order[0]);
         }else{
           observer.next(null);
@@ -129,9 +130,14 @@ export class OrderService extends ModelService{
         return Observable.create(observer => {
           self._connection.get("/orders",queryParameters)
             .map(response => response.entries)
-            .subscribe(orderData => {
-              observer.next(orderData);
-            })
+            .subscribe(
+              orderData => {
+                observer.next(orderData);
+              },
+              error => {
+                observer.next([]);
+              }
+            )
         })
       },
       orderData => {

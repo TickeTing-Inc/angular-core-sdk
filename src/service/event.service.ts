@@ -128,7 +128,8 @@ export class EventService extends ModelService{
         ("local-tickets-from" in eventData)?eventData["local-tickets-from"]:eventData["startPrice"],
         eventData["flyer"],
         eventData["banner"],
-        self._tierService
+        self._tierService,
+        self._connection
       ));
     })
   }

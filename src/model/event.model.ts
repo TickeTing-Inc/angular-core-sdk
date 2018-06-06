@@ -1,7 +1,9 @@
 import { TierService } from '../service/tier.service';
 import { Observable } from 'rxjs/Observable';
 
+import { Connection } from './connection.model';
 import { Tier } from './tier.model';
+import { Profile } from './profile.model';
 
 export class Event{
   public public: boolean;
@@ -15,7 +17,7 @@ export class Event{
   constructor(public endpoint: string, public title: string, public description: string, public category: string,
                 startTime: string, endTime: string, gatesOpen: string, public place: string, isPublic: boolean,
                 public cancelled: boolean, public featured: boolean, startPrice: number, public flyer: string,
-                public banner: string, private _tierService: TierService){
+                public banner: string, private _tierService: TierService, private _connection: Connection){
     this['start-time'] = new Date(startTime);
     this['end-time'] = new Date(endTime);
     this['gates-open'] = new Date(gatesOpen);
@@ -42,6 +44,25 @@ export class Event{
 
   get startPrice(): number{
     return this['local-tickets-from'];
+  }
+
+  isOnGuestlist(profile: Profile): Observable<boolean>{
+    return Observable.create(observer => {
+      let isOnGuestlist = false;
+      this._connection.get(this.endpoint+"/guestlist")
+        .map(guestlist => guestlist.profiles)
+        .subscribe(guestlist => {
+          for(let i=0; i < guestlist.length; i++){
+            let regex = new RegExp(profile.endpoint+"$");
+            if(regex.test(guestlist[i])){
+              isOnGuestlist = true;
+              break;
+            }
+          }
+
+          observer.next(isOnGuestlist);
+      })
+    });
   }
 
   private _getTiers(): Observable<Array<Tier>>{
