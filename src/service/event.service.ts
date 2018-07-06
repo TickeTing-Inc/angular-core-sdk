@@ -22,8 +22,16 @@ export class EventService extends ModelService{
     super(_configService,_connectionService);
   }
 
-  listUpcoming(page: number, records: number, title: string = "", order: string = "asc"): Observable<Array<Event>>{
-    return this._list(page,records,{upcoming:true,public:true,sort:"date",order:order,title:title});
+  listUpcoming(page: number, records: number, title: string = "", order: string = "asc", sort: string = "date"): Observable<Array<Event>>{
+    return this._list(page,records,{upcoming:true,cancelled:false,public:true,sort:sort,order:order,title:title});
+  }
+
+  listFeatured(page: number, records: number): Observable<Array<Event>>{
+    return this._list(page,records,{featured:true,cancelled:false,public:true,sort:"date",order:"desc"});
+  }
+
+  listPromoted(page: number, records: number): Observable<Array<Event>>{
+    return this._list(page,records,{promoted:true,cancelled:false,public:true,sort:"date",order:"desc"});
   }
 
   countUpcoming(title: string = ""): Observable<number>{
@@ -126,6 +134,7 @@ export class EventService extends ModelService{
         eventData["cancelled"],
         eventData["featured"],
         ("local-tickets-from" in eventData)?eventData["local-tickets-from"]:eventData["startPrice"],
+        ("tickets-from" in eventData)?eventData["tickets-from"]:eventData["startPriceUSD"],
         eventData["flyer"],
         eventData["banner"],
         self._tierService,

@@ -13,16 +13,19 @@ export class Event{
   private 'end-time': Date;
   private 'gates-open': Date;
   private 'local-tickets-from': number;
+  private 'tickets-from': number;
 
   constructor(public endpoint: string, public title: string, public description: string, public category: string,
                 startTime: string, endTime: string, gatesOpen: string, public place: string, isPublic: boolean,
-                public cancelled: boolean, public featured: boolean, startPrice: number, public flyer: string,
-                public banner: string, private _tierService: TierService, private _connection: Connection){
+                public cancelled: boolean, public featured: boolean, startPrice: number, startPriceUSD: number,
+                public flyer: string, public banner: string, private _tierService: TierService,
+                private _connection: Connection){
     this['start-time'] = new Date(startTime);
     this['end-time'] = new Date(endTime);
     this['gates-open'] = new Date(gatesOpen);
     this.public = isPublic;
     this['local-tickets-from'] = startPrice;
+    this['tickets-from'] = startPriceUSD;
     this.tiers = this._getTiers();
   }
 
@@ -44,6 +47,10 @@ export class Event{
 
   get startPrice(): number{
     return this['local-tickets-from'];
+  }
+
+  get startPriceUSD(): number{
+    return this['tickets-from'];
   }
 
   isOnGuestlist(profile: Profile): Observable<boolean>{
