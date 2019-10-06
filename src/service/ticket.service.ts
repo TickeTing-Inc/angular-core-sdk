@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { CacheService } from './cache.service';
 import { ConfigService } from './config.service';
@@ -34,7 +35,7 @@ export class TicketService extends ModelService{
     return self._cacheService.retrieve(cacheKey,
       () => {
         return self._connection.get(endpoint,queryParameters)
-          .map(wallet => wallet.tickets);
+          .pipe(map(wallet => wallet.tickets));
       },
       ticketData => {
         return self._buildTicket(ticketData,self);

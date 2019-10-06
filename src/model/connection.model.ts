@@ -1,9 +1,7 @@
-import { ConfigService } from '../service/config.service';
 import { Http, Headers, URLSearchParams, RequestOptions } from '@angular/http';
 
-import { Observable } from 'rxjs/Observable';
-import "rxjs/add/operator/map";
-import "rxjs/add/operator/switchMap";
+import { Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 export class Connection{
   private _baseUrl: string;
@@ -23,44 +21,44 @@ export class Connection{
     secret.subscribe(secret => {
       this._secret = secret;
     })
-    
+
     this._http = httpClient;
   }
 
   get(endpoint: string, queryParameters: any = {}){
     return this._request("get",endpoint,{},queryParameters)
-      .map(response => response.json());
+      .pipe(map(response => response.json()));
   }
 
   post(endpoint: string, payload: any){
     return this._request("post",endpoint,{},{},payload)
-      .map(response => response.json());
+      .pipe(map(response => response.json()));
   }
 
   put(endpoint: string, payload: any){
     return this._request("get",endpoint)
-      .switchMap(response => {
+      .pipe(switchMap(response => {
         let headers = {
           "If-Match":response.headers.get('etag'),
           "If-Unmodified-Since":response.headers.get('last-modified')
         }
 
         return this._request("put",endpoint,headers,{},payload)
-          .map(response => response.json());
-      })
+          .pipe(map(response => response.json()));
+      }))
   }
 
   delete(endpoint: string){
     return this._request("get",endpoint)
-      .switchMap(response => {
+      .pipe(switchMap(response => {
         let headers = {
           "If-Match":response.headers.get('etag'),
           "If-Unmodified-Since":response.headers.get('last-modified')
         }
 
         return this._request("delete",endpoint,headers)
-          .map(response => response.json());
-      })
+          .pipe(map(response => response.json()));
+      }))
   }
 
   private _request(method: string, endpoint: string, headers: any = {}, queryParameters: any = {}, payload: any = {}){

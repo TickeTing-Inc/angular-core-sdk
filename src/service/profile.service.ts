@@ -1,29 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/switchMap";
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { ConnectionService } from './connection.service';
 import { CacheService } from './cache.service';
-import { EventService } from './event.service';
-import { TierService } from './tier.service';
-import { TicketService } from './ticket.service';
-import { XpressCardService } from './xpress-card.service';
-import { OrderService } from './order.service';
 
 import { Profile } from '../model/profile.model';
 import { Order } from '../model/order.model';
 
 @Injectable()
 export class ProfileService extends ModelService{
-  constructor(_configService: ConfigService, private _cacheService: CacheService,
-                private _eventService: EventService, private _xpressCardService: XpressCardService,
-                private _ticketService: TicketService, private _orderService: OrderService,
-                _connectionService: ConnectionService, private _tierService: TierService){
+  constructor(_configService: ConfigService, private _cacheService: CacheService,_connectionService: ConnectionService){
     super(_configService, _connectionService);
   }
 
@@ -54,9 +43,9 @@ export class ProfileService extends ModelService{
 
   private _get(parameters: any = {}): Observable<Profile>{
     return this._list(1,1,parameters)
-      .switchMap(profiles => {
-        return Observable.of((profiles.length > 0)?profiles[0]:null)
-      });
+      .pipe(switchMap(profiles => {
+        return of((profiles.length > 0)?profiles[0]:null)
+      }));
   }
 
   private _list(page: number, records: number, parameters: any = {}): Observable<Array<Profile>>{
@@ -74,7 +63,7 @@ export class ProfileService extends ModelService{
     return this._cacheService.retrieve(cacheKey,
       () => {
         return self._connection.get("/profiles",queryParameters)
-          .map(response => response.entries)
+          .pipe(map(response => response.entries))
       },
       profileData => {
         return this._buildProfile(profileData,self);

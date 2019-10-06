@@ -9,7 +9,7 @@ import { Event } from './event.model';
 import { Order } from './order.model';
 import { Tier } from './tier.model';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export class Profile{
   public xpressCard: Observable<XpressCard>;

@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/switchMap";
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
@@ -40,9 +37,9 @@ export class MerchantService extends ModelService{
 
   private _get(parameters: any = {}): Observable<Merchant>{
     return this._list(1,1,parameters)
-      .switchMap(merchants => {
-        return Observable.of((merchants.length > 0)?merchants[0]:null)
-      });
+      .pipe(switchMap(merchants => {
+        return of((merchants.length > 0)?merchants[0]:null)
+      }))
   }
 
   private _list(page: number, records: number, parameters: any = {}): Observable<Array<Merchant>>{
@@ -60,7 +57,7 @@ export class MerchantService extends ModelService{
     return this._cacheService.retrieve(cacheKey,
       () => {
         return self._connection.get("/merchants",queryParameters)
-          .map(response => response.entries)
+          .pipe(map(response => response.entries))
       },
       merchantData => {
         return this._buildMerchant(merchantData,self);

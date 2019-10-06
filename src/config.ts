@@ -1,4 +1,4 @@
 export const config = {
-  PRODUCTION_BASE : "https://ticketing.mywadapi.com",
-  SANDBOX_BASE : "https://ticketing.sandbox.mywadapi.com"
+  PRODUCTION_BASE : "https://api.ticketingevents.com/v1",
+  SANDBOX_BASE : "https://api.ticketingevents.com/v1"
 };

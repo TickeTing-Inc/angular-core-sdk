@@ -1,6 +1,5 @@
-import { Observable } from 'rxjs/Observable';
-import { Subscriber } from 'rxjs/Subscriber';
-import { Profile} from './profile.model';
+import { Observable, Subscriber, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Tier } from './tier.model';
 import { Connection } from './connection.model';
 
@@ -24,7 +23,7 @@ export class Order{
               total: number, shareable: boolean, xpressCard: string, public device: string, public os: string,
               public version: string, public created: Date, public expires: Date, public closed: Date,
               private _merchant: any, private _agent: any, private _ticketService: TicketService,
-              private _tierService: TierService,_connectionService: ConnectionService,
+              private _tierService: TierService, private _connectionService: ConnectionService,
               private _cacheService: CacheService, private _baseUrl: string, private observer: Subscriber<any>){
     this.created = new Date(created);
     this.expires = new Date(expires);
@@ -34,7 +33,7 @@ export class Order{
     this['xpress-card'] = xpressCard;
     this.items = this._getItems();
 
-    this._connection = _connectionService.openConnection();
+    this._connection = this._connectionService.openConnection();
     this._itemsObservers = [];
   }
 
@@ -80,7 +79,7 @@ export class Order{
 
   addItems(tier: Tier, amount: number): Observable<boolean>{
     if(!this.isOpen()){
-      return Observable.of(false);
+      return of(false);
     }
 
     let self = this;
@@ -126,7 +125,7 @@ export class Order{
 
   removeItems(tier: Tier, amount: number): Observable<boolean>{
     if(!this.isOpen()){
-      return Observable.of(false);
+      return of(false);
     }
 
     let self = this;
@@ -164,7 +163,7 @@ export class Order{
 
   clearItems(){
     if(!this.isOpen()){
-      return Observable.of(false);
+      return of(false);
     }
 
     let self = this;
@@ -302,7 +301,7 @@ export class Order{
           zip:zip,
           email:email,
           phone:phone
-        }).map(response => response.transactions)
+        }).pipe(map(response => response.transactions))
         .subscribe(
           transactions => {
             if(transactions[0].result == "Success"){
@@ -370,7 +369,7 @@ export class Order{
         () => {
           return Observable.create(internalObserver => {
             self._connection.get(cacheKey)
-              .map(tickets => tickets.tickets)
+              .pipe(map(tickets => tickets.tickets))
               .subscribe(orderItems => {
                   let tiers = Object.keys(orderItems);
                   let tiersSeen = 0;
@@ -399,7 +398,7 @@ export class Order{
           })
         },
         orderItems => {
-          return Observable.of(orderItems);
+          return of(orderItems);
         },self.isActive()?60:604800).subscribe(items => {
           if(self._cacheService.isValid(cacheKey)){
             observer.next(items);

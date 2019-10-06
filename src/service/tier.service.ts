@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/switchMap";
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
@@ -38,7 +35,7 @@ export class TierService extends ModelService{
     return this._cacheService.retrieve(cacheKey,
       () => {
         return self._connection.get(cacheKey)
-          .map(response => response.tiers)
+          .pipe(map(response => response.tiers))
       },
       tierData => {
         return this._buildTier(tierData,self);

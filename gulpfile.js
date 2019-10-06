@@ -1,6 +1,7 @@
 /* eslint-disable */
 var gulp = require('gulp'),
   path = require('path'),
+  ngFsUtils = require('@angular/compiler-cli/src/ngtsc/file_system'),
   ngc = require('@angular/compiler-cli/src/main').main,
   rollup = require('gulp-rollup'),
   rename = require('gulp-rename'),
@@ -17,11 +18,12 @@ const distFolder = path.join(rootFolder, 'dist');
 /**
  * 1. Delete /dist folder
  */
-gulp.task('clean:dist', function () {
+gulp.task('clean:dist', function (done) {
 
   // Delete contents but not dist folder to avoid broken npm links
   // when dist directory is removed while npm link references it.
-  return fs.emptyDirSync(distFolder);
+  fs.emptyDirSync(distFolder);
+  return done();
 });
 
 /**
@@ -51,6 +53,7 @@ gulp.task('inline-resources', function () {
  *    As of Angular 5, ngc accepts an array and no longer returns a promise.
  */
 gulp.task('ngc', function () {
+  ngFsUtils.setFileSystem(new ngFsUtils.NodeJSFileSystem());
   ngc(['--project', `${tmpFolder}/tsconfig.es5.json`]);
   return Promise.resolve()
 });
@@ -120,7 +123,7 @@ gulp.task('rollup:umd', function () {
         // The name to use for the module for UMD/IIFE bundles
         // (required for bundles with exports)
         // See "name" in https://rollupjs.org/#core-functionality
-        name: 'angular-core-sdk',
+        name: 'angular-auth-sdk',
 
         // See "globals" in https://rollupjs.org/#core-functionality
         globals: {
@@ -137,7 +140,7 @@ gulp.task('rollup:umd', function () {
       }
 
     }))
-    .pipe(rename('angular-core-sdk.umd.js'))
+    .pipe(rename('angular-auth-sdk.umd.js'))
     .pipe(gulp.dest(distFolder));
 });
 
@@ -170,19 +173,20 @@ gulp.task('copy:readme', function () {
 /**
  * 10. Delete /.tmp folder
  */
-gulp.task('clean:tmp', function () {
-  return deleteFolder(tmpFolder);
+gulp.task('clean:tmp', function (done) {
+  deleteFolder(tmpFolder);
+  return done();
 });
 
 /**
  * 11. Delete /build folder
  */
-gulp.task('clean:build', function () {
-  return deleteFolder(buildFolder);
+gulp.task('clean:build', function (done) {
+  deleteFolder(buildFolder);
+  return done();
 });
 
-gulp.task('compile', function () {
-  runSequence(
+gulp.task('compile', gulp.series([
     'clean:dist',
     'copy:source',
     'inline-resources',
@@ -193,18 +197,11 @@ gulp.task('compile', function () {
     'copy:manifest',
     'copy:readme',
     'clean:build',
-    'clean:tmp',
-    function (err) {
-      if (err) {
-        console.log('ERROR:', err.message);
-        deleteFolder(distFolder);
-        deleteFolder(tmpFolder);
-        deleteFolder(buildFolder);
-      } else {
-        console.log('Compilation finished succesfully');
-      }
-    });
-});
+    'clean:tmp'],
+    function (done) {
+      console.log('Compilation finished succesfully');
+      return done()
+    }))
 
 /**
  * Watch for any change in the /src folder and compile files
@@ -213,19 +210,13 @@ gulp.task('watch', function () {
   gulp.watch(`${srcFolder}/**/*`, ['compile']);
 });
 
-gulp.task('clean', function (callback) {
-  runSequence('clean:dist', 'clean:tmp', 'clean:build', callback);
-});
+gulp.task('clean', gulp.series(['clean:dist', 'clean:tmp', 'clean:build']));
 
-gulp.task('build', function (callback) {
-  runSequence('clean', 'compile', callback);
-});
+gulp.task('build', gulp.series(['clean', 'compile']));
 
-gulp.task('build:watch', function (callback) {
-  runSequence('build', 'watch', callback);
-});
+gulp.task('build:watch', gulp.series(['build', 'watch']));
 
-gulp.task('default', ['build:watch']);
+gulp.task('default', gulp.series(['build:watch']));
 
 /**
  * Deletes the specified folder

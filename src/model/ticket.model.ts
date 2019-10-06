@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { TierService } from '../service/tier.service';
 import { Tier } from './tier.model';

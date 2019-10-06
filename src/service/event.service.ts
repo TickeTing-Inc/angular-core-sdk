@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/switchMap";
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { ConnectionService } from './connection.service';
 import { CacheService } from './cache.service';
-import { TierService } from './tier.service';
 
 import { Event } from '../model/event.model';
 import { Tier } from '../model/tier.model';
@@ -17,8 +13,7 @@ import { Profile } from '../model/profile.model';
 
 @Injectable()
 export class EventService extends ModelService{
-  constructor(_configService: ConfigService, _connectionService: ConnectionService,
-              private _cacheService: CacheService, private _tierService: TierService){
+  constructor(_configService: ConfigService, _connectionService: ConnectionService, private _cacheService: CacheService){
     super(_configService,_connectionService);
   }
 
@@ -81,7 +76,7 @@ export class EventService extends ModelService{
     return this._cacheService.retrieve(cacheKey,
       () => {
         return self._connection.get(prefix+"/events",queryParameters)
-          .map(response => prefix?response.events:response.entries);
+          .pipe(map(response => prefix?response.events:response.entries));
       },
       eventData => {
         return self._buildEvent(eventData,self);
@@ -100,7 +95,7 @@ export class EventService extends ModelService{
 
     return Observable.create(observer => {
       this._connection.get("/events",queryParameters)
-        .map(response => response.total)
+        .pipe(map(response => response.total))
         .subscribe(count => {
           observer.next(count);
         })
@@ -112,7 +107,7 @@ export class EventService extends ModelService{
     return this._cacheService.retrieve(profile.endpoint+"/"+type,
       () => {
         return self._connection.get(profile.endpoint+"/"+type)
-          .map(response => response.events)
+          .pipe(map(response => response.events))
       },
       eventData => {
         return self._buildEvent(eventData,self);

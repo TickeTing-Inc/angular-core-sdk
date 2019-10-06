@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { CacheService } from '../service/cache.service';
 import { ConnectionService } from '../service/connection.service';
@@ -14,9 +14,9 @@ export class Merchant{
 
   constructor(public endpoint: string, public name: string, public registered: Date,
                 public active: boolean, private _cacheService: CacheService,
-                _connectionService: ConnectionService, private _orderService: OrderService,
+                private _connectionService: ConnectionService, private _orderService: OrderService,
                 private _profileService: ProfileService){
-    this._connection = _connectionService.openConnection();
+    this._connection = this._connectionService.openConnection();
     this.tokens = this._getTokens();
   }
 

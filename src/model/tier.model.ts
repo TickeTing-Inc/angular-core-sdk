@@ -1,5 +1,6 @@
 import { Connection } from './connection.model';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 export class Tier{
   public hasOptions: Observable<boolean>;
@@ -26,8 +27,8 @@ export class Tier{
 
   private _hasOptions(): Observable<boolean>{
     return this._connection.get(this.endpoint+"/options")
-      .switchMap(response => {
-        return Observable.of(response.options.length > 0);
-      })
+      .pipe(switchMap(response => {
+        return of(response.options.length > 0);
+      }))
   }
 }

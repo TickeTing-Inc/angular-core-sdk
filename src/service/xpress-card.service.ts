@@ -1,16 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/switchMap";
+import { Observable } from 'rxjs';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { ConnectionService } from './connection.service';
 import { CacheService } from './cache.service';
 
-import { Connection } from '../model/connection.model';
 import { Profile } from '../model/profile.model';
 import { XpressCard } from '../model/xpress-card.model';
 

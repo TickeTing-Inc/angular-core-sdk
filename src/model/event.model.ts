@@ -1,5 +1,6 @@
 import { TierService } from '../service/tier.service';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { Connection } from './connection.model';
 import { Tier } from './tier.model';
@@ -57,7 +58,7 @@ export class Event{
     return Observable.create(observer => {
       let isOnGuestlist = false;
       this._connection.get(this.endpoint+"/guestlist")
-        .map(guestlist => guestlist.profiles)
+        .pipe(map(guestlist => guestlist.profiles))
         .subscribe(guestlist => {
           for(let i=0; i < guestlist.length; i++){
             let regex = new RegExp(profile.endpoint+"$");

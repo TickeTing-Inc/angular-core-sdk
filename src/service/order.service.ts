@@ -1,13 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { Subscriber } from 'rxjs/Subscriber';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { CacheService } from './cache.service';
 import { ConnectionService } from './connection.service';
-import { TicketService } from './ticket.service';
-import { TierService } from './tier.service';
 
 import { Profile } from '../model/profile.model';
 import { Merchant } from '../model/merchant.model';
@@ -17,9 +15,8 @@ import { Order } from '../model/order.model';
 export class OrderService extends ModelService{
   private _lastOrder: string;
 
-  constructor(_configService: ConfigService, private _connectionService: ConnectionService,
-                private _cacheService: CacheService,private _ticketService: TicketService,
-                private _tierService: TierService){
+  constructor(_configService: ConfigService, _connectionService: ConnectionService,
+                private _cacheService: CacheService){
     super(_configService,_connectionService);
     this._lastOrder = localStorage.getItem("last-order:@ticketing/angular-core-sdk");
   }
@@ -129,7 +126,7 @@ export class OrderService extends ModelService{
       () => {
         return Observable.create(observer => {
           self._connection.get("/orders",queryParameters)
-            .map(response => response.entries)
+            .pipe(map(response => response.entries))
             .subscribe(
               orderData => {
                 observer.next(orderData);
@@ -174,7 +171,7 @@ export class OrderService extends ModelService{
 
     return Observable.create(observer => {
       this._connection.get("/orders",queryParameters)
-        .map(response => response.total)
+        .pipe(map(response => response.total))
         .subscribe(orderCount => {
           observer.next(orderCount);
         })
