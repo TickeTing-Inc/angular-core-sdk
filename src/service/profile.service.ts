@@ -6,13 +6,22 @@ import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { ConnectionService } from './connection.service';
 import { CacheService } from './cache.service';
+import { EventService } from './event.service';
+import { TierService } from './tier.service';
+import { TicketService } from './ticket.service';
+import { XpressCardService } from './xpress-card.service';
+import { OrderService } from './order.service';
 
 import { Profile } from '../model/profile.model';
 import { Order } from '../model/order.model';
 
 @Injectable()
 export class ProfileService extends ModelService{
-  constructor(_configService: ConfigService, private _cacheService: CacheService,_connectionService: ConnectionService){
+  constructor(_configService: ConfigService, private _cacheService: CacheService,
+    private _eventService: EventService, private _xpressCardService: XpressCardService,
+    private _ticketService: TicketService, private _orderService: OrderService,
+    _connectionService: ConnectionService, private _tierService: TierService){
+
     super(_configService, _connectionService);
   }
 

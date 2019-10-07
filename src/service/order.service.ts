@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
 import { CacheService } from './cache.service';
+import { TicketService } from './ticket.service';
+import { TierService } from './tier.service';
 import { ConnectionService } from './connection.service';
 
 import { Profile } from '../model/profile.model';
@@ -15,8 +17,9 @@ import { Order } from '../model/order.model';
 export class OrderService extends ModelService{
   private _lastOrder: string;
 
-  constructor(_configService: ConfigService, _connectionService: ConnectionService,
-                private _cacheService: CacheService){
+  constructor(_configService: ConfigService, private _connectionService: ConnectionService,
+                private _cacheService: CacheService, private _ticketService: TicketService,
+                private _tierService: TierService){
     super(_configService,_connectionService);
     this._lastOrder = localStorage.getItem("last-order:@ticketing/angular-core-sdk");
   }

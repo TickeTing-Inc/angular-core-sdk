@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 
 import { ModelService } from './model.service';
 import { ConfigService } from './config.service';
+import { TierService } from './tier.service';
 import { ConnectionService } from './connection.service';
 import { CacheService } from './cache.service';
 
@@ -13,7 +14,8 @@ import { Profile } from '../model/profile.model';
 
 @Injectable()
 export class EventService extends ModelService{
-  constructor(_configService: ConfigService, _connectionService: ConnectionService, private _cacheService: CacheService){
+  constructor(_configService: ConfigService, _connectionService: ConnectionService,
+                private _cacheService: CacheService, private _tierService: TierService){
     super(_configService,_connectionService);
   }
 
